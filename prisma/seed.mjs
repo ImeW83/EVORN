@@ -45,5 +45,9 @@ for (const [cat, name, price, material, featured, description] of products) {
   });
 }
 
+for (const name of new Set(products.map((p) => p[3]))) {
+  await db.material.upsert({ where: { name }, update: {}, create: { name } });
+}
+
 console.log("Seeded", categories.length, "categories and", products.length, "products");
 await db.$disconnect();
