@@ -1,22 +1,19 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AddToCart } from "@/components/AddToCart";
-import { ProductCard } from "@/components/ProductCard";
-import { ProductImage } from "@/components/ProductImage";
-import { db } from "@/lib/db";
+import { AddToCart } from "@/components/store/AddToCart";
+import { ProductCard } from "@/components/store/ProductCard";
+import { ProductImage } from "@/components/store/ProductImage";
 import { money } from "@/lib/format";
+import { getProductBySlug, getRelatedProducts } from "@/server/services/catalog";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProductPage({ params }: PageProps<"/product/[slug]">) {
   const { slug } = await params;
-  const product = await db.product.findUnique({ where: { slug }, include: { category: true } });
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const related = await db.product.findMany({
-    where: { categoryId: product.categoryId, NOT: { id: product.id } },
-    take: 4,
-  });
+  const related = await getRelatedProducts(product.categoryId, product.id);
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-12">

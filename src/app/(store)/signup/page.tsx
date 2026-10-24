@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { AuthForm } from "@/components/AuthForm";
-import { getCustomer } from "@/lib/customer";
-import { signup } from "../account/actions";
+import { AuthForm } from "@/components/account/AuthForm";
+import { getCustomer } from "@/server/auth/customer";
+import { signup } from "@/actions/store/account";
 
 export const dynamic = "force-dynamic";
 

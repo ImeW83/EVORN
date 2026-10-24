@@ -1,20 +1,17 @@
 import Link from "next/link";
-import { ProfileForm } from "@/components/ProfileForm";
-import { StatusBadge } from "@/components/StatusBadge";
-import { requireCustomer } from "@/lib/customer";
-import { db } from "@/lib/db";
+import { ProfileForm } from "@/components/account/ProfileForm";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { requireCustomer } from "@/server/auth/customer";
 import { money } from "@/lib/format";
-import { logout } from "./actions";
+import { listOrdersForUser } from "@/server/services/orders";
+import { logout } from "@/actions/store/account";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   const user = await requireCustomer();
-  const orders = await db.order.findMany({
-    where: { userId: user.id },
-    orderBy: { createdAt: "desc" },
-    include: { items: true },
-  });
+  const orders = await listOrdersForUser(user.id);
+  const { name, email, phone, address, city } = user; // never send the password hash to the browser
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-12">
@@ -28,7 +25,7 @@ export default async function AccountPage() {
       <div className="mt-10 grid gap-12 lg:grid-cols-2">
         <section>
           <h2 className="text-3xl">Your details</h2>
-          <ProfileForm user={user} />
+          <ProfileForm user={{ name, email, phone, address, city }} />
         </section>
 
         <section>

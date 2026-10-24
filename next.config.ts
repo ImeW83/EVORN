@@ -2,8 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // Product photos uploaded by the admin live in Vercel Blob.
-    remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
+    // Product photos uploaded by the admin live on Cloudinary.
+    remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],
+  },
+  experimental: {
+    // Server actions carry photo and receipt uploads; Vercel itself caps request bodies at 4.5 MB.
+    serverActions: { bodySizeLimit: "4mb" },
   },
   turbopack: {
     rules: {

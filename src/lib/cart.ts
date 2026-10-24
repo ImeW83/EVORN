@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 export type CartLine = {
-  productId: number;
+  productId: string;
   slug: string;
   name: string;
   price: number;
@@ -19,7 +19,9 @@ const listeners = new Set<() => void>();
 function read(): CartLine[] {
   if (cache) return cache;
   try {
-    cache = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    const saved: CartLine[] = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    // Carts saved before the MongoDB move used numeric ids; drop those lines.
+    cache = saved.filter((l) => typeof l.productId === "string");
   } catch {
     cache = [];
   }
@@ -66,14 +68,14 @@ export const cart = {
         : [...lines, { ...line, quantity }],
     );
   },
-  setQuantity(productId: number, quantity: number) {
+  setQuantity(productId: string, quantity: number) {
     write(
       quantity <= 0
         ? read().filter((l) => l.productId !== productId)
         : read().map((l) => (l.productId === productId ? { ...l, quantity: Math.min(quantity, 20) } : l)),
     );
   },
-  remove(productId: number) {
+  remove(productId: string) {
     write(read().filter((l) => l.productId !== productId));
   },
   clear() {

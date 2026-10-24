@@ -17,3 +17,25 @@ export function calcDelivery(subtotal: number, { fee, freeOver }: { fee: number;
 
 export const ORDER_STATUSES = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+export const PAYMENT_METHODS = ["COD", "BANK_TRANSFER"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  COD: "Cash on delivery",
+  BANK_TRANSFER: "Bank transfer",
+};
+
+// NONE = nothing to verify (cash on delivery). The others track a bank-transfer receipt.
+export const PAYMENT_STATUSES = ["NONE", "AWAITING_RECEIPT", "RECEIPT_SUBMITTED", "VERIFIED", "REJECTED"] as const;
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  NONE: "Pay on delivery",
+  AWAITING_RECEIPT: "Awaiting receipt",
+  RECEIPT_SUBMITTED: "Receipt submitted",
+  VERIFIED: "Payment verified",
+  REJECTED: "Receipt rejected",
+};
+
+// Images are uploaded through server actions; Vercel caps request bodies at 4.5 MB.
+export const MAX_UPLOAD_BYTES = 3.5 * 1024 * 1024;
+export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];

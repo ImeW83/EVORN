@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth";
-import { logout } from "../actions";
+import { requireAdmin } from "@/server/auth/admin";
+import { logout } from "@/actions/admin/auth";
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   await requireAdmin();
@@ -18,6 +18,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
             <Link href="/admin/products" className="hover:text-tan">Products</Link>
             <Link href="/admin/categories" className="hover:text-tan">Categories</Link>
             <Link href="/admin/materials" className="hover:text-tan">Materials</Link>
+            <Link href="/admin/bank-accounts" className="hover:text-tan">Bank accounts</Link>
             <Link href="/admin/settings" className="hover:text-tan">Settings</Link>
             <Link href="/" className="hover:text-tan">View store</Link>
             <form action={logout}>

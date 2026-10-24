@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useActionState } from "react";
-import { login } from "../actions";
+import { login } from "@/actions/admin/auth";
 
 export default function AdminLogin() {
   const [state, action, pending] = useActionState(login, undefined);

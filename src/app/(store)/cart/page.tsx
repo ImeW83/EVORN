@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { OrderSummary } from "@/components/OrderSummary";
-import { ProductImage } from "@/components/ProductImage";
+import { OrderSummary } from "@/components/store/OrderSummary";
+import { ProductImage } from "@/components/store/ProductImage";
 import { cart, useCart } from "@/lib/cart";
 import { money } from "@/lib/format";
 

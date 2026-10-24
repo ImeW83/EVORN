@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { requireAdmin } from "@/server/auth/admin";
+
 import { money } from "@/lib/format";
+import { listProductsWithCategory } from "@/server/services/catalog";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProducts() {
   await requireAdmin();
-  const products = await db.product.findMany({ orderBy: { createdAt: "desc" }, include: { category: true } });
+  const products = await listProductsWithCategory();
   return (
     <>
       <div className="flex items-center justify-between gap-4">

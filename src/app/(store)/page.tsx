@@ -1,15 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ProductCard } from "@/components/ProductCard";
-import { db } from "@/lib/db";
+import { ProductCard } from "@/components/store/ProductCard";
+import { getCategoriesWithCounts, getFeaturedProducts } from "@/server/services/catalog";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const [categories, featured] = await Promise.all([
-    db.category.findMany({ orderBy: { id: "asc" }, include: { _count: { select: { products: true } } } }),
-    db.product.findMany({ where: { featured: true }, orderBy: { createdAt: "desc" }, take: 8 }),
-  ]);
+  const [categories, featured] = await Promise.all([getCategoriesWithCounts(), getFeaturedProducts(8)]);
 
   return (
     <>
@@ -46,7 +43,7 @@ export default async function Home() {
               className="group flex aspect-square flex-col items-center justify-center border border-line bg-sand text-center transition hover:bg-brown hover:text-cream"
             >
               <span className="font-display text-2xl">{c.name}</span>
-              <span className="mt-1 text-[11px] uppercase tracking-[0.2em] text-tan">{c._count.products} pieces</span>
+              <span className="mt-1 text-[11px] uppercase tracking-[0.2em] text-tan">{c.productCount} pieces</span>
             </Link>
           ))}
         </div>

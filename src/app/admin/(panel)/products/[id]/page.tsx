@@ -1,22 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ProductForm } from "@/components/ProductForm";
-import { requireAdmin } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { deleteProduct, removeProductImage, updateProduct } from "../../../products";
+import { deleteProduct, removeProductImage, updateProduct } from "@/actions/admin/products";
+import { ProductForm } from "@/components/admin/ProductForm";
+import { requireAdmin } from "@/server/auth/admin";
+import { getCategories, getMaterials, getProductById } from "@/server/services/catalog";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditProduct({ params }: PageProps<"/admin/products/[id]">) {
   await requireAdmin();
   const { id } = await params;
-  const productId = Number(id);
-  if (!Number.isInteger(productId)) notFound();
-  const [product, categories, materials] = await Promise.all([
-    db.product.findUnique({ where: { id: productId } }),
-    db.category.findMany({ orderBy: { id: "asc" } }),
-    db.material.findMany({ orderBy: { name: "asc" } }),
-  ]);
+  const [product, categories, materials] = await Promise.all([getProductById(id), getCategories(), getMaterials()]);
   if (!product) notFound();
 
   return (

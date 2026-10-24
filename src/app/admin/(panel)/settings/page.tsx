@@ -1,6 +1,6 @@
-import { SettingsForm } from "@/components/SettingsForm";
-import { requireAdmin } from "@/lib/auth";
-import { getDeliverySettings } from "@/lib/settings";
+import { SettingsForm } from "@/components/admin/SettingsForm";
+import { requireAdmin } from "@/server/auth/admin";
+import { getDeliverySettings } from "@/server/services/settings";
 
 export const dynamic = "force-dynamic";
 

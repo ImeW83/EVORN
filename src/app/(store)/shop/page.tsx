@@ -1,16 +1,8 @@
 import Link from "next/link";
-import type { Prisma } from "@prisma/client";
-import { ProductCard } from "@/components/ProductCard";
-import { db } from "@/lib/db";
+import { ProductCard } from "@/components/store/ProductCard";
+import { SORTS, getCategories, getUsedMaterials, searchProducts } from "@/server/services/catalog";
 
 export const dynamic = "force-dynamic";
-
-const SORTS: Record<string, { label: string; orderBy: Prisma.ProductOrderByWithRelationInput }> = {
-  newest: { label: "Newest", orderBy: { createdAt: "desc" } },
-  "price-asc": { label: "Price: low to high", orderBy: { price: "asc" } },
-  "price-desc": { label: "Price: high to low", orderBy: { price: "desc" } },
-  name: { label: "Name A–Z", orderBy: { name: "asc" } },
-};
 
 type Search = { category?: string; material?: string; min?: string; max?: string; sort?: string; q?: string };
 
@@ -24,17 +16,10 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
   const min = Number(first(sp.min)) || undefined;
   const max = Number(first(sp.max)) || undefined;
 
-  const where: Prisma.ProductWhereInput = {
-    ...(category && { category: { slug: category } }),
-    ...(material && { material }),
-    ...(q && { OR: [{ name: { contains: q } }, { description: { contains: q } }] }),
-    ...((min || max) && { price: { ...(min && { gte: min }), ...(max && { lte: max }) } }),
-  };
-
   const [categories, materials, products] = await Promise.all([
-    db.category.findMany({ orderBy: { id: "asc" } }),
-    db.product.findMany({ select: { material: true }, distinct: ["material"], orderBy: { material: "asc" } }),
-    db.product.findMany({ where, orderBy: SORTS[sort].orderBy }),
+    getCategories(),
+    getUsedMaterials(),
+    searchProducts({ category, material, q, min, max, sort }),
   ]);
 
   const activeCategory = categories.find((c) => c.slug === category);
@@ -79,7 +64,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
             <select id="material" name="material" defaultValue={material ?? ""} className={field}>
               <option value="">All materials</option>
               {materials.map((m) => (
-                <option key={m.material} value={m.material}>{m.material}</option>
+                <option key={m} value={m}>{m}</option>
               ))}
             </select>
           </div>

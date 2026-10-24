@@ -1,7 +1,7 @@
-import { DeliveryProvider } from "@/components/DeliveryProvider";
-import { Footer } from "@/components/Footer";
-import { Navbar } from "@/components/Navbar";
-import { getDeliverySettings } from "@/lib/settings";
+import { DeliveryProvider } from "@/components/store/DeliveryProvider";
+import { Footer } from "@/components/store/Footer";
+import { Navbar } from "@/components/store/Navbar";
+import { getDeliverySettings } from "@/server/services/settings";
 
 // Reads the database (menu, delivery settings), so never prerender at build time.
 export const dynamic = "force-dynamic";
