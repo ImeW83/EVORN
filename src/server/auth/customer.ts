@@ -1,16 +1,14 @@
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { connectDb } from "../db";
 import { UserModel, isId } from "../models";
 import { plain } from "../serialize";
 import type { User } from "../types";
+import { signToken, verifyToken } from "./jwt";
 
 const COOKIE = "evorn_user";
 const MAX_AGE = 60 * 60 * 24 * 30;
-
-const sign = (id: string) =>
-  createHmac("sha256", process.env.SESSION_SECRET ?? "dev-secret").update(`user:${id}`).digest("hex");
 
 const safeEqual = (a: string, b: string) => {
   const x = Buffer.from(a);
@@ -30,7 +28,7 @@ export function verifyPassword(password: string, stored: string) {
 }
 
 export async function startCustomerSession(userId: string) {
-  (await cookies()).set(COOKIE, `${userId}.${sign(userId)}`, {
+  (await cookies()).set(COOKIE, await signToken("customer", userId, MAX_AGE), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -44,10 +42,8 @@ export async function endCustomerSession() {
 }
 
 export async function getCustomer(): Promise<User | null> {
-  const value = (await cookies()).get(COOKIE)?.value;
-  if (!value) return null;
-  const [id, sig] = value.split(".");
-  if (!isId(id) || !sig || !safeEqual(sig, sign(id))) return null;
+  const id = await verifyToken((await cookies()).get(COOKIE)?.value, "customer");
+  if (!isId(id)) return null;
   await connectDb();
   const user = await UserModel.findById(id).lean();
   return user ? plain<User>(user) : null;

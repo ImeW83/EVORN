@@ -39,3 +39,7 @@ export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
 // Images are uploaded through server actions; Vercel caps request bodies at 4.5 MB.
 export const MAX_UPLOAD_BYTES = 3.5 * 1024 * 1024;
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+// A customer can review a product once an order containing it reaches one of these statuses.
+export const REVIEWABLE_STATUSES: readonly OrderStatus[] = ["DELIVERED"];
+export const MAX_REVIEW_NOTE = 1000;

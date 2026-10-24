@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { money } from "@/lib/format";
+import type { RatingSummary } from "@/server/types";
+import { Stars } from "../ui/Stars";
 import { AddToCart } from "./AddToCart";
 import { ProductImage } from "./ProductImage";
 
 type P = { id: string; slug: string; name: string; price: number; image: string | null; material: string; inStock: boolean };
 
-export function ProductCard({ product }: { product: P }) {
+export function ProductCard({ product, rating }: { product: P; rating?: RatingSummary }) {
   return (
     <div className="group flex flex-col">
       <Link href={`/product/${product.slug}`} className="block overflow-hidden">
@@ -21,6 +23,12 @@ export function ProductCard({ product }: { product: P }) {
           {product.name}
         </Link>
         <p className="mt-1 text-sm text-brown">{money(product.price)}</p>
+        {rating && (
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-brown/70">
+            <Stars value={rating.average} className="text-sm" />
+            <span>({rating.count})</span>
+          </p>
+        )}
         <div className="mt-4">
           <AddToCart product={product} disabled={!product.inStock} compact />
         </div>

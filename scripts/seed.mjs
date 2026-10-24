@@ -53,7 +53,7 @@ for (const [cat, name, price, material, featured, description] of products) {
     {
       $setOnInsert: {
         name, slug: slugify(name), price, material, featured, description,
-        image: null, imagePublicId: null, inStock: true, categoryId: category._id, createdAt: now,
+        images: [], inStock: true, categoryId: category._id, createdAt: now,
       },
     },
     { upsert: true },

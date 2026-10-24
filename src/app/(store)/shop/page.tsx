@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/store/ProductCard";
 import { SORTS, getCategories, getUsedMaterials, searchProducts } from "@/server/services/catalog";
+import { getRatings } from "@/server/services/reviews";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
     searchProducts({ category, material, q, min, max, sort }),
   ]);
 
+  const ratings = await getRatings(products.map((p) => p.id));
   const activeCategory = categories.find((c) => c.slug === category);
   const hasFilters = Boolean(material || q || min || max);
   const href = (slug?: string) => (slug ? `/shop?category=${slug}` : "/shop");
@@ -106,7 +108,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
         ) : (
           <div className="grid grid-cols-2 gap-x-5 gap-y-10 xl:grid-cols-3">
             {products.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard key={p.id} product={p} rating={ratings[p.id]} />
             ))}
           </div>
         )}

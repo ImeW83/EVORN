@@ -2,11 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/store/ProductCard";
 import { getCategoriesWithCounts, getFeaturedProducts } from "@/server/services/catalog";
+import { getRatings } from "@/server/services/reviews";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const [categories, featured] = await Promise.all([getCategoriesWithCounts(), getFeaturedProducts(8)]);
+  const ratings = await getRatings(featured.map((p) => p.id));
 
   return (
     <>
@@ -58,7 +60,7 @@ export default async function Home() {
         </div>
         <div className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-4">
           {featured.map((p) => (
-            <ProductCard key={p.id} product={p} />
+            <ProductCard key={p.id} product={p} rating={ratings[p.id]} />
           ))}
         </div>
       </section>

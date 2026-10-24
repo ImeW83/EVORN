@@ -33,20 +33,27 @@ const uniqueName = () => `${Date.now().toString(36)}${randomBytes(4).toString("h
 
 type Result<T> = T | { error: string };
 
-// Public product photo, served straight from Cloudinary's CDN.
-export async function uploadProductImage(file: File): Promise<Result<{ url: string; publicId: string }>> {
-  const invalid = validate(file);
-  if (invalid) return { error: invalid };
-  try {
-    const r = await upload(Buffer.from(await file.arrayBuffer()), {
-      folder: "evorn/products",
-      public_id: uniqueName(),
-    });
-    return { url: r.secure_url, publicId: r.public_id };
-  } catch (e) {
-    console.error("Cloudinary product upload failed:", e);
-    return { error: "Image upload failed. Please try again." };
-  }
+export const PRODUCT_FOLDER = "evorn/products";
+
+// Product photos go from the admin's browser straight to Cloudinary (several photos would not fit in one
+// server-action request). The server only signs the upload, so nobody else can upload to the account.
+export function signProductUpload() {
+  const cfg = cloudinary.config();
+  if (!configured() || !cfg.cloud_name || !cfg.api_key || !cfg.api_secret) return null;
+  const timestamp = Math.round(Date.now() / 1000);
+  const signature = cloudinary.utils.api_sign_request({ folder: PRODUCT_FOLDER, timestamp }, cfg.api_secret);
+  return { cloudName: cfg.cloud_name, apiKey: cfg.api_key, folder: PRODUCT_FOLDER, timestamp, signature };
+}
+
+// An image reference from the browser is only trusted if it points at our own product folder.
+export function isOwnProductImage(img: { url?: unknown; publicId?: unknown }) {
+  const cloud = cloudinary.config().cloud_name;
+  return (
+    typeof img.url === "string" &&
+    typeof img.publicId === "string" &&
+    img.publicId.startsWith(`${PRODUCT_FOLDER}/`) &&
+    img.url.startsWith(`https://res.cloudinary.com/${cloud}/`)
+  );
 }
 
 // Payment receipts are uploaded as `authenticated`, so only signed links (made for the admin) can open them.

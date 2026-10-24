@@ -6,6 +6,8 @@ export type Category = { id: string; name: string; slug: string };
 
 export type Material = { id: string; name: string };
 
+export type ProductImage = { url: string; publicId: string };
+
 export type Product = {
   id: string;
   name: string;
@@ -13,8 +15,8 @@ export type Product = {
   description: string;
   price: number;
   material: string;
-  image: string | null;
-  imagePublicId: string | null;
+  images: ProductImage[]; // first one is the cover
+  image: string | null; // cover url, derived from images
   inStock: boolean;
   featured: boolean;
   categoryId: string;
@@ -65,3 +67,15 @@ export type BankAccount = {
   branch: string;
   active: boolean;
 };
+
+export type Review = {
+  id: string;
+  productId: string;
+  userName: string;
+  rating: number;
+  note: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type RatingSummary = { average: number; count: number };

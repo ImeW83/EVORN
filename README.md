@@ -18,8 +18,8 @@ src/
     (store)/              Public shop: home, shop, product, cart, checkout, order, login, signup, account
     admin/                Admin: login + (panel)/ orders, products, categories, materials, bank-accounts, settings
   actions/                Server actions (every mutation)
-    admin/                auth, orders (status, verify/reject payment), products, categories, materials, bank-accounts, settings
-    store/                account, checkout, payment (receipt upload)
+    admin/                auth, orders (status, verify/reject payment), products, categories, materials, bank-accounts, reviews, settings
+    store/                account, checkout, payment (receipt upload), reviews
   components/
     store/                Storefront UI (Navbar, ProductCard, CheckoutForm, ReceiptUpload, ...)
     account/              Login/signup/profile forms
@@ -43,7 +43,24 @@ scripts/seed.mjs          Sample data
   private (authenticated) Cloudinary image. The admin opens the order, checks the receipt, then either confirms the
   payment (the order becomes CONFIRMED) or rejects it with a reason so the customer can upload a new one.
 
+## Security
+
+- Admin and customer logins are **JWTs** (HS256, signed with `SESSION_SECRET`) in httpOnly, SameSite cookies. Each token is
+  issued for one audience, so a customer token is never accepted as an admin token; expired, tampered and `alg: none` tokens
+  are rejected. In production the app refuses to issue or check tokens if `SESSION_SECRET` is missing.
+- Passwords are hashed with scrypt. Receipts are private Cloudinary images, shown to the admin through signed links.
+
+## Product photos and reviews
+
+- Each product can have up to 8 photos (the first is the cover). The admin uploads them straight from the browser to
+  Cloudinary using a signature created by the server, so size is not limited by the 4.5 MB request cap.
+- The product page shows them in a 3D depth carousel; clicking the centre photo opens a full-screen viewer that expands
+  from the photo, with zoom, keyboard and swipe support.
+- Customers can leave one review per product (1–5 stars and an optional note), and only once an order containing the
+  product is **Delivered** (`REVIEWABLE_STATUSES` in `src/lib/config.ts`). The check runs on the server. The admin can
+  remove reviews under *Admin → Reviews*.
+
 ## Deploying to Vercel
 
-Set the variables from `.env.example` in the project settings. Uploads go through server actions, so images are limited
-to 3.5 MB (Vercel caps request bodies at 4.5 MB).
+Set the variables from `.env.example` in the project settings. Payment receipts go through a server action, so they are
+limited to 3.5 MB (Vercel caps request bodies at 4.5 MB). `SESSION_SECRET` is required in production.

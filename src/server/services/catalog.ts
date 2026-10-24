@@ -4,6 +4,13 @@ import { CategoryModel, MaterialModel, ProductModel, isId } from "../models";
 import { plain } from "../serialize";
 import type { Category, Material, Product } from "../types";
 
+// Adds the derived `image` (cover url) to a product document.
+const plainProduct = (doc: unknown): Product => {
+  const p = plain<Omit<Product, "image">>(doc);
+  return { ...p, image: p.images?.[0]?.url ?? null, images: p.images ?? [] };
+};
+const plainProducts = (docs: unknown[]) => docs.map(plainProduct);
+
 export type ProductWithCategory = Product & { category: Category };
 
 export const SORTS: Record<string, { label: string; sort: Record<string, SortOrder> }> = {
@@ -52,7 +59,7 @@ export async function getUsedMaterials() {
 
 export async function getFeaturedProducts(limit = 8) {
   await connectDb();
-  return plain<Product[]>(await ProductModel.find({ featured: true }).sort({ createdAt: -1 }).limit(limit).lean());
+  return plainProducts(await ProductModel.find({ featured: true }).sort({ createdAt: -1 }).limit(limit).lean());
 }
 
 export type ProductFilters = { category?: string; material?: string; q?: string; min?: number; max?: number; sort?: string };
@@ -71,7 +78,7 @@ export async function searchProducts(f: ProductFilters) {
   }
   if (f.min || f.max) query.price = { ...(f.min && { $gte: f.min }), ...(f.max && { $lte: f.max }) };
   const sort = (SORTS[f.sort ?? ""] ?? SORTS.newest).sort;
-  return plain<Product[]>(await ProductModel.find(query).sort(sort).lean());
+  return plainProducts(await ProductModel.find(query).sort(sort).lean());
 }
 
 export async function getProductBySlug(slug: string): Promise<ProductWithCategory | null> {
@@ -80,12 +87,12 @@ export async function getProductBySlug(slug: string): Promise<ProductWithCategor
   if (!product) return null;
   const category = await CategoryModel.findById(product.categoryId).lean();
   if (!category) return null;
-  return { ...plain<Product>(product), category: plain<Category>(category) };
+  return { ...plainProduct(product), category: plain<Category>(category) };
 }
 
 export async function getRelatedProducts(categoryId: string, excludeId: string, limit = 4) {
   await connectDb();
-  return plain<Product[]>(await ProductModel.find({ categoryId, _id: { $ne: excludeId } }).limit(limit).lean());
+  return plainProducts(await ProductModel.find({ categoryId, _id: { $ne: excludeId } }).limit(limit).lean());
 }
 
 // Admin
@@ -96,7 +103,7 @@ export async function listProductsWithCategory(): Promise<ProductWithCategory[]>
     ProductModel.find().sort({ createdAt: -1 }).lean(),
     getCategories(),
   ]);
-  return plain<Product[]>(products).flatMap((p) => {
+  return plainProducts(products).flatMap((p) => {
     const category = categories.find((c) => c.id === p.categoryId);
     return category ? [{ ...p, category }] : [];
   });
@@ -106,5 +113,5 @@ export async function getProductById(id: string) {
   if (!isId(id)) return null;
   await connectDb();
   const product = await ProductModel.findById(id).lean();
-  return product ? plain<Product>(product) : null;
+  return product ? plainProduct(product) : null;
 }

@@ -29,8 +29,7 @@ export const ProductModel = define(
       description: { type: String, required: true },
       price: { type: Number, required: true, min: 0 },
       material: { type: String, required: true },
-      image: { type: String, default: null },
-      imagePublicId: { type: String, default: null },
+      images: { type: [new Schema({ url: String, publicId: String }, { _id: false })], default: [] },
       inStock: { type: Boolean, default: true },
       featured: { type: Boolean, default: false },
       categoryId: { type: Schema.Types.ObjectId, ref: "Category", required: true, index: true },
@@ -118,6 +117,21 @@ export const BankAccountModel = define(
     { ...opts, timestamps: { createdAt: true, updatedAt: false } },
   ),
   "bankaccounts",
+);
+
+export const ReviewModel = define(
+  "Review",
+  new Schema(
+    {
+      productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, index: true },
+      userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+      userName: { type: String, required: true }, // shown publicly: first name and last initial
+      rating: { type: Number, required: true, min: 1, max: 5 },
+      note: { type: String, default: "", maxlength: 1000 },
+    },
+    { ...opts, timestamps: true },
+  ).index({ productId: 1, userId: 1 }, { unique: true }), // one review per customer per product
+  "reviews",
 );
 
 export const isId = (id: unknown): id is string => typeof id === "string" && Types.ObjectId.isValid(id) && id.length === 24;

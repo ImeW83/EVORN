@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { deleteProduct, removeProductImage, updateProduct } from "@/actions/admin/products";
+import { deleteProduct, updateProduct } from "@/actions/admin/products";
 import { ProductForm } from "@/components/admin/ProductForm";
 import { requireAdmin } from "@/server/auth/admin";
 import { getCategories, getMaterials, getProductById } from "@/server/services/catalog";
@@ -20,11 +20,6 @@ export default async function EditProduct({ params }: PageProps<"/admin/products
       <ProductForm action={updateProduct.bind(null, product.id)} categories={categories} materials={materials} product={product} submitLabel="Save changes" />
 
       <div className="mt-10 flex max-w-2xl flex-wrap gap-6 border-t border-line pt-6 text-xs uppercase tracking-[0.2em]">
-        {product.image && (
-          <form action={removeProductImage.bind(null, product.id)}>
-            <button className="underline hover:text-brown/70">Remove photo</button>
-          </form>
-        )}
         <form action={deleteProduct.bind(null, product.id)}>
           <button className="text-red-700 underline hover:text-red-900">Delete product</button>
         </form>

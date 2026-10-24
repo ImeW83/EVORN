@@ -1,11 +1,10 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { signToken, verifyToken } from "./jwt";
 
 const COOKIE = "evorn_admin";
-
-const sign = () =>
-  createHmac("sha256", process.env.SESSION_SECRET ?? "dev-secret").update("admin").digest("hex");
+const MAX_AGE = 60 * 60 * 12;
 
 export function passwordMatches(input: string) {
   const a = Buffer.from(input);
@@ -14,12 +13,12 @@ export function passwordMatches(input: string) {
 }
 
 export async function startAdminSession() {
-  (await cookies()).set(COOKIE, sign(), {
+  (await cookies()).set(COOKIE, await signToken("admin", "admin", MAX_AGE), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 12,
+    maxAge: MAX_AGE,
   });
 }
 
@@ -28,11 +27,7 @@ export async function endAdminSession() {
 }
 
 export async function isAdmin() {
-  const value = (await cookies()).get(COOKIE)?.value;
-  if (!value) return false;
-  const a = Buffer.from(value);
-  const b = Buffer.from(sign());
-  return a.length === b.length && timingSafeEqual(a, b);
+  return (await verifyToken((await cookies()).get(COOKIE)?.value, "admin")) === "admin";
 }
 
 export async function requireAdmin() {

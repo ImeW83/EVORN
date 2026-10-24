@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
-import { ProductImage } from "@/components/store/ProductImage";
+import { useActionState, useState } from "react";
+import type { ProductImage } from "@/server/types";
+import { ProductImagesField } from "./ProductImagesField";
 
 const field = "w-full border border-line bg-cream px-4 py-3 text-sm outline-none focus:border-brown";
 const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
@@ -9,7 +10,7 @@ const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
 type Action = (prev: { error?: string; saved?: boolean } | undefined, f: FormData) => Promise<{ error?: string; saved?: boolean } | undefined>;
 type Product = {
   name: string; price: number; categoryId: string; description: string; material: string;
-  image: string | null; inStock: boolean; featured: boolean;
+  images: ProductImage[]; inStock: boolean; featured: boolean;
 };
 
 export function ProductForm({
@@ -22,6 +23,7 @@ export function ProductForm({
   submitLabel: string;
 }) {
   const [state, run, pending] = useActionState(action, undefined);
+  const [uploading, setUploading] = useState(false);
   return (
     <form action={run} className="mt-8 max-w-2xl space-y-5">
       <div>
@@ -52,20 +54,15 @@ export function ProductForm({
         <label htmlFor="description" className={label}>Description *</label>
         <textarea id="description" name="description" rows={4} required defaultValue={product?.description} className={field} />
       </div>
-      <div>
-        <label htmlFor="image" className={label}>Photo (JPG, PNG or WebP, max 3.5 MB)</label>
-        {product?.image && <ProductImage src={product.image} alt={product.name} className="mb-3 h-40 w-40" />}
-        <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" className="text-sm" />
-        {product?.image && <p className="mt-1 text-xs text-brown/60">Choose a file to replace the current photo.</p>}
-      </div>
+      <ProductImagesField initial={product?.images ?? []} onBusyChange={setUploading} />
       <div className="flex gap-8 text-sm">
         <label className="flex items-center gap-2"><input type="checkbox" name="inStock" defaultChecked={product?.inStock ?? true} /> In stock</label>
         <label className="flex items-center gap-2"><input type="checkbox" name="featured" defaultChecked={product?.featured ?? false} /> Featured on home page</label>
       </div>
       {state?.error && <p role="alert" className="border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">{state.error}</p>}
       {state?.saved && <p role="status" className="text-sm text-green-800">Saved.</p>}
-      <button disabled={pending} className="bg-brown px-10 py-3.5 text-xs uppercase tracking-[0.25em] text-cream hover:bg-brown-dark disabled:opacity-60">
-        {pending ? "Saving…" : submitLabel}
+      <button disabled={pending || uploading} className="bg-brown px-10 py-3.5 text-xs uppercase tracking-[0.25em] text-cream hover:bg-brown-dark disabled:opacity-60">
+        {pending ? "Saving…" : uploading ? "Uploading photos…" : submitLabel}
       </button>
     </form>
   );

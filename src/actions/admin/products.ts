@@ -5,11 +5,20 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/server/auth/admin";
 import { connectDb } from "@/server/db";
 import { CategoryModel, MaterialModel, OrderModel, ProductModel, isId } from "@/server/models";
-import { deleteImage, uploadProductImage } from "@/server/services/cloudinary";
+import { deleteImage, isOwnProductImage, signProductUpload } from "@/server/services/cloudinary";
+import type { ProductImage } from "@/server/types";
 
 type State = { error?: string; saved?: boolean } | undefined;
 
+const MAX_IMAGES = 8;
+
 const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+
+// Signed parameters the admin's browser needs to upload a photo straight to Cloudinary.
+export async function getUploadParams() {
+  await requireAdmin();
+  return signProductUpload();
+}
 
 async function uniqueSlug(name: string, ignoreId?: string) {
   const base = slugify(name) || "product";
@@ -18,6 +27,17 @@ async function uniqueSlug(name: string, ignoreId?: string) {
     const hit = await ProductModel.findOne({ slug }).select("_id").lean();
     if (!hit || String(hit._id) === ignoreId) return slug;
     slug = `${base}-${i}`;
+  }
+}
+
+function parseImages(raw: string): ProductImage[] | null {
+  try {
+    const list: unknown = JSON.parse(raw || "[]");
+    if (!Array.isArray(list) || list.length > MAX_IMAGES) return null;
+    if (!list.every((i) => i && isOwnProductImage(i))) return null;
+    return list.map((i) => ({ url: i.url, publicId: i.publicId }));
+  } catch {
+    return null;
   }
 }
 
@@ -34,13 +54,8 @@ async function parse(f: FormData) {
   if (!isId(categoryId) || !(await CategoryModel.exists({ _id: categoryId }))) return { error: "Choose a category." } as const;
   if (!(await MaterialModel.exists({ name: material }))) return { error: "Choose a material from the list." } as const;
 
-  let image: { url: string; publicId: string } | undefined;
-  const file = f.get("image");
-  if (file instanceof File && file.size > 0) {
-    const uploaded = await uploadProductImage(file);
-    if ("error" in uploaded) return { error: uploaded.error } as const;
-    image = uploaded;
-  }
+  const images = parseImages(str("images"));
+  if (!images) return { error: `Photos could not be read (up to ${MAX_IMAGES} are allowed). Please re-add them.` } as const;
 
   return {
     data: {
@@ -49,10 +64,10 @@ async function parse(f: FormData) {
       categoryId,
       description,
       material,
+      images,
       inStock: f.get("inStock") === "on",
       featured: f.get("featured") === "on",
     },
-    image,
   } as const;
 }
 
@@ -67,11 +82,7 @@ export async function createProduct(_prev: State, f: FormData): Promise<State> {
   await connectDb();
   const parsed = await parse(f);
   if ("error" in parsed) return { error: parsed.error };
-  await ProductModel.create({
-    ...parsed.data,
-    slug: await uniqueSlug(parsed.data.name),
-    ...(parsed.image && { image: parsed.image.url, imagePublicId: parsed.image.publicId }),
-  });
+  await ProductModel.create({ ...parsed.data, slug: await uniqueSlug(parsed.data.name) });
   refresh();
   redirect("/admin/products");
 }
@@ -83,32 +94,16 @@ export async function updateProduct(id: string, _prev: State, f: FormData): Prom
   if (!existing) return { error: "Product not found." };
   const parsed = await parse(f);
   if ("error" in parsed) return { error: parsed.error };
-  const oldImage = existing.imagePublicId;
+
+  const kept = new Set(parsed.data.images.map((i) => i.publicId));
+  const removed = (existing.images as ProductImage[]).map((i) => i.publicId).filter((p) => !!p && !kept.has(p));
+
   // Slug stays fixed so existing links keep working.
   existing.set(parsed.data);
-  if (parsed.image) {
-    existing.image = parsed.image.url;
-    existing.imagePublicId = parsed.image.publicId;
-  }
   await existing.save();
-  if (parsed.image) await deleteImage(oldImage);
+  await Promise.all(removed.map((p) => deleteImage(p)));
   refresh(existing.slug);
   return { saved: true };
-}
-
-export async function removeProductImage(id: string) {
-  await requireAdmin();
-  if (!isId(id)) return;
-  await connectDb();
-  const product = await ProductModel.findById(id);
-  if (!product) return;
-  const old = product.imagePublicId;
-  product.image = null;
-  product.imagePublicId = null;
-  await product.save();
-  await deleteImage(old);
-  refresh(product.slug);
-  revalidatePath(`/admin/products/${id}`);
 }
 
 export async function deleteProduct(id: string) {
@@ -124,7 +119,7 @@ export async function deleteProduct(id: string) {
     await product.save();
   } else {
     await product.deleteOne();
-    await deleteImage(product.imagePublicId);
+    await Promise.all((product.images as ProductImage[]).map((i) => deleteImage(i.publicId)));
   }
   refresh(product.slug);
   redirect("/admin/products");
