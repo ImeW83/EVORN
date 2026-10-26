@@ -1,10 +1,12 @@
 "use server";
 
+import { after } from "next/server";
 import { PAYMENT_METHODS, calcDelivery, type PaymentMethod } from "@/lib/config";
 import { PHONE_ERROR, normalizePhone } from "@/lib/phone";
 import { getCustomer } from "@/server/auth/customer";
 import { connectDb } from "@/server/db";
 import { BankAccountModel, OrderModel, ProductModel, isId } from "@/server/models";
+import { notifyAdminNewOrder } from "@/server/services/notifications";
 import { newOrderNumber } from "@/server/services/orders";
 import { getDeliverySettings } from "@/server/services/settings";
 
@@ -60,6 +62,8 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   const number = newOrderNumber();
   const bank = input.paymentMethod === "BANK_TRANSFER";
 
+  const total = subtotal + deliveryFee;
+
   await OrderModel.create({
     number,
     userId: (await getCustomer())?.id ?? null,
@@ -74,8 +78,23 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     items: lines,
     subtotal,
     deliveryFee,
-    total: subtotal + deliveryFee,
+    total,
   });
+
+  // Notify the admin after the response is sent, so checkout never waits on email or SMS.
+  after(() =>
+    notifyAdminNewOrder({
+      number,
+      name,
+      phone,
+      email,
+      address,
+      city,
+      paymentMethod: input.paymentMethod,
+      total,
+      items: lines,
+    }),
+  );
 
   return { ok: true, number };
 }
