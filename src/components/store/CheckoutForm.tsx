@@ -7,6 +7,7 @@ import { placeOrder } from "@/actions/store/checkout";
 import { cart, useCart } from "@/lib/cart";
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from "@/lib/config";
 import { money } from "@/lib/format";
+import { PHONE_HINT } from "@/lib/phone";
 import type { BankAccount } from "@/server/types";
 import { BankAccountList } from "./BankAccountList";
 import { OrderSummary } from "./OrderSummary";
@@ -89,12 +90,12 @@ export function CheckoutForm({
             </div>
             <div>
               <label htmlFor="phone" className={label}>Phone *</label>
-              <input id="phone" name="phone" type="tel" required autoComplete="tel" defaultValue={prefill.phone} className={field} />
+              <input id="phone" name="phone" type="tel" required placeholder={PHONE_HINT} autoComplete="tel" defaultValue={prefill.phone} className={field} />
             </div>
           </div>
           <div>
-            <label htmlFor="email" className={label}>Email (optional)</label>
-            <input id="email" name="email" type="email" autoComplete="email" defaultValue={prefill.email} className={field} />
+            <label htmlFor="email" className={label}>Email *</label>
+            <input id="email" name="email" type="email" required autoComplete="email" defaultValue={prefill.email} className={field} />
           </div>
           <div>
             <label htmlFor="address" className={label}>Delivery address *</label>

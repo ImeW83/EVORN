@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { PHONE_ERROR, normalizePhone } from "@/lib/phone";
 import {
   endCustomerSession,
   hashPassword,
@@ -54,9 +55,10 @@ export async function logout() {
 export async function updateProfile(_prev: FormState, f: FormData): Promise<FormState> {
   const user = await requireCustomer();
   const name = str(f, "name");
-  const phone = str(f, "phone");
+  const rawPhone = str(f, "phone");
+  const phone = rawPhone && normalizePhone(rawPhone);
   if (!name) return { error: "Name is required." };
-  if (phone && !/^[+\d][\d\s-]{6,}$/.test(phone)) return { error: "Please enter a valid phone number." };
+  if (rawPhone && !phone) return { error: PHONE_ERROR };
   await connectDb();
   await UserModel.updateOne(
     { _id: user.id },

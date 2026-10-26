@@ -1,6 +1,7 @@
 "use server";
 
 import { PAYMENT_METHODS, calcDelivery, type PaymentMethod } from "@/lib/config";
+import { PHONE_ERROR, normalizePhone } from "@/lib/phone";
 import { getCustomer } from "@/server/auth/customer";
 import { connectDb } from "@/server/db";
 import { BankAccountModel, OrderModel, ProductModel, isId } from "@/server/models";
@@ -22,14 +23,15 @@ export type CheckoutResult = { ok: true; number: string } | { ok: false; error: 
 
 export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> {
   const name = input.name?.trim();
-  const phone = input.phone?.trim();
+  const rawPhone = input.phone?.trim();
   const address = input.address?.trim();
   const city = input.city?.trim();
   const email = input.email?.trim();
 
-  if (!name || !phone || !address || !city) return { ok: false, error: "Please fill in all required fields." };
-  if (!/^[+\d][\d\s-]{6,}$/.test(phone)) return { ok: false, error: "Please enter a valid phone number." };
-  if (email && !/^\S+@\S+\.\S+$/.test(email)) return { ok: false, error: "Please enter a valid email address." };
+  if (!name || !rawPhone || !email || !address || !city) return { ok: false, error: "Please fill in all required fields." };
+  const phone = normalizePhone(rawPhone);
+  if (!phone) return { ok: false, error: PHONE_ERROR };
+  if (!/^\S+@\S+\.\S+$/.test(email)) return { ok: false, error: "Please enter a valid email address." };
   if (!Array.isArray(input.items) || input.items.length === 0) return { ok: false, error: "Your cart is empty." };
   if (!(PAYMENT_METHODS as readonly string[]).includes(input.paymentMethod)) return { ok: false, error: "Choose a payment method." };
 
@@ -63,7 +65,7 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
     userId: (await getCustomer())?.id ?? null,
     name,
     phone,
-    email: email || null,
+    email,
     address,
     city,
     notes: input.notes?.trim() || null,

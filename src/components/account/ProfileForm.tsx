@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { updateProfile } from "@/actions/store/account";
+import { PHONE_HINT } from "@/lib/phone";
 
 const field = "w-full border border-line bg-cream px-4 py-3 text-sm outline-none focus:border-brown";
 const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
@@ -22,7 +23,7 @@ export function ProfileForm({ user }: { user: Profile }) {
       </div>
       <div>
         <label htmlFor="phone" className={label}>Phone</label>
-        <input id="phone" name="phone" type="tel" defaultValue={user.phone ?? ""} className={field} />
+        <input id="phone" name="phone" type="tel" placeholder={PHONE_HINT} defaultValue={user.phone ?? ""} className={field} />
       </div>
       <div>
         <label htmlFor="address" className={label}>Delivery address</label>
