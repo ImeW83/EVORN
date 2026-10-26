@@ -19,12 +19,16 @@ The brand name and tagline are defined once in `STORE` in `src/lib/config.ts`.
 - Process orders: update status, check bank-transfer receipts, confirm or reject payments
 - Manage bank accounts, delivery settings, and customer reviews
 
-**Stack:** Next.js 16 (App Router, server actions), React 19, Tailwind CSS 4, MongoDB with Mongoose, Cloudinary, JWT sessions (`jose`).
+**Notifications**
+- The admin gets an email and an SMS when a new order is placed
+- The customer gets an email and an SMS when their order is confirmed
+
+**Stack:** Next.js 16 (App Router, server actions), React 19, Tailwind CSS 4, MongoDB with Mongoose, Cloudinary, Resend (email), SMSAPI.lk (SMS), JWT sessions (`jose`).
 
 ## Setup
 
 1. `npm install`
-2. Copy `.env.example` to `.env` and fill it in (MongoDB URI, Cloudinary keys, admin password, session secret).
+2. Copy `.env.example` to `.env` and fill it in (MongoDB URI, Cloudinary keys, admin password, session secret; the email and SMS settings are optional, see Notifications).
 3. `node --env-file=.env scripts/seed.mjs` adds sample categories, materials and products.
 4. `npm run dev`, then open http://localhost:3000 (admin: `/admin/login`).
 
@@ -61,6 +65,30 @@ scripts/seed.mjs          Sample data
   private (authenticated) Cloudinary image. The admin opens the order, checks the receipt, then either confirms the
   payment (the order becomes CONFIRMED) or rejects it with a reason so the customer can upload a new one.
 
+## Notifications
+
+Two messages are sent, each by email (Resend) and SMS (SMSAPI.lk):
+
+- **New order:** to the admin, using `ADMIN_NOTIFY_EMAIL` and `ADMIN_NOTIFY_PHONE`.
+- **Order confirmed:** to the customer, using the email and phone given at checkout.
+
+How it works:
+
+- Messages are sent after the response is returned (`after()` from `next/server`), so checkout never waits on them and a
+  failed email or SMS can never break an order.
+- An order sends its confirmation only once: `confirmPendingOrder` in `src/server/services/confirm-order.ts` moves it from
+  PENDING to CONFIRMED in a single update and returns the order only when it made the change. Re-selecting CONFIRMED does
+  not send again.
+- If a variable is missing, that channel is skipped silently. Errors returned by Resend or SMSAPI.lk, and network failures,
+  are logged. A customer without an email only gets the SMS.
+- Replies to the emails go to `EMAIL_REPLY_TO`, so it should be an inbox that is checked.
+- Emails are sent from `EMAIL_FROM`, which must be on a domain verified in Resend. Until a domain is verified, Resend
+  delivers only to the account's own email address.
+- SMS uses the sender ID in `SMS_SENDER_ID`. Use the approved brand sender ID once the provider has approved it.
+- Message text is built in `src/server/services/notifications.ts`; the senders are `email.ts` and `sms.ts` in the same folder.
+- Receipt links and order-page links are never put in messages, because the order page is readable by anyone who has the
+  order number.
+
 ## Security
 
 - Admin and customer logins are **JWTs** (HS256, signed with `SESSION_SECRET`) in httpOnly, SameSite cookies. Each token is
@@ -85,7 +113,7 @@ scripts/seed.mjs          Sample data
 
 ## Roadmap
 
-- Email reminder a few days after delivery, linking to the order's review section (needs an email provider).
+- Email reminder a few days after delivery, linking to the order's review section (the email helper in `src/server/services/email.ts` can be reused).
 
 ## Running with Docker
 
@@ -105,9 +133,8 @@ docker run -d --name evorn -p 3000:3000 --env-file .env --restart unless-stopped
 ```
 
 The site is then at http://localhost:3000. Variables read at run time: `MONGODB_URI`, `CLOUDINARY_URL` (or
-`CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET`), `ADMIN_PASSWORD`, `SESSION_SECRET`, and, once
-notifications are added, `RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_NOTIFY_EMAIL`, `TEXTLK_API_TOKEN`, `TEXTLK_SENDER_ID`,
-`ADMIN_NOTIFY_PHONE`. There are no `NEXT_PUBLIC_` variables, so nothing needs to be set at build time.
+`CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET`), `ADMIN_PASSWORD`, `SESSION_SECRET`, and, for notifications, `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO`, `ADMIN_NOTIFY_EMAIL`,
+`ADMIN_NOTIFY_PHONE`, `SMS_API_URL`, `SMS_API_TOKEN`, `SMS_SENDER_ID`. There are no `NEXT_PUBLIC_` variables, so nothing needs to be set at build time.
 
 To update: `git pull`, then `docker compose up -d --build`. Check the container with `docker compose ps`; the healthcheck
 requests `/admin/login`, which does not need the database.
