@@ -1,7 +1,25 @@
-# EVORN — jewellery store
+# EVORN — Your Everyday Accessories
 
-Next.js 16 storefront with a customer account area and an admin panel.
+An online jewellery store: a Next.js 16 storefront with a customer account area and an admin panel.
 Data lives in **MongoDB** (Mongoose); product photos and payment receipts live in **Cloudinary**.
+The brand name and tagline are defined once in `STORE` in `src/lib/config.ts`.
+
+## Features
+
+**Storefront**
+- Browse by category, search, and a home page with featured pieces
+- Product pages with a multi-photo 3D carousel and full-screen zoom viewer
+- Cart, checkout, and order confirmation pages
+- Pay by cash on delivery or bank transfer (with receipt upload)
+- Customer accounts: sign up, log in, edit details, view orders
+- Verified-purchase reviews with star ratings, written from the product page or from the order
+
+**Admin panel**
+- Manage products (up to 8 photos each), categories and materials
+- Process orders: update status, check bank-transfer receipts, confirm or reject payments
+- Manage bank accounts, delivery settings, and customer reviews
+
+**Stack:** Next.js 16 (App Router, server actions), React 19, Tailwind CSS 4, MongoDB with Mongoose, Cloudinary, JWT sessions (`jose`).
 
 ## Setup
 
@@ -59,6 +77,15 @@ scripts/seed.mjs          Sample data
 - Customers can leave one review per product (1–5 stars and an optional note), and only once an order containing the
   product is **Delivered** (`REVIEWABLE_STATUSES` in `src/lib/config.ts`). The check runs on the server. The admin can
   remove reviews under *Admin → Reviews*.
+- Reviews can be written in two places, both using the same `ReviewForm` and `submitReview` action:
+  - the **product page**, and
+  - the **order page** (`/order/[number]`): once an order is Delivered, its owner sees a "Rate your purchase" form for
+    each item (existing reviews are pre-filled and can be updated). *Account → Your orders* shows a "to review" badge
+    on delivered orders that still have unreviewed items.
+
+## Roadmap
+
+- Email reminder a few days after delivery, linking to the order's review section (needs an email provider).
 
 ## Deploying to Vercel
 
