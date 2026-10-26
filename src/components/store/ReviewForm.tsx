@@ -26,9 +26,9 @@ export function ReviewForm({ productId, existing }: { productId: string; existin
       </fieldset>
 
       <div>
-        <label htmlFor="note" className="mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80">Your review (optional)</label>
+        <label htmlFor={`note-${productId}`} className="mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80">Your review (optional)</label>
         <textarea
-          id="note"
+          id={`note-${productId}`}
           name="note"
           rows={4}
           maxLength={MAX_REVIEW_NOTE}

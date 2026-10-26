@@ -38,6 +38,14 @@ export async function getUserReview(userId: string, productId: string) {
   return review ? plain<Review>(review) : null;
 }
 
+// The customer's own reviews for the given products, keyed by product id.
+export async function getUserReviews(userId: string, productIds: string[]) {
+  if (!isId(userId) || !productIds.length) return {} as Record<string, Review>;
+  await connectDb();
+  const rows = plain<Review[]>(await ReviewModel.find({ userId, productId: { $in: productIds.filter(isId) } }).lean());
+  return Object.fromEntries(rows.map((r) => [r.productId, r])) as Record<string, Review>;
+}
+
 // Admin: every review with the product it belongs to.
 export async function listAllReviews() {
   await connectDb();

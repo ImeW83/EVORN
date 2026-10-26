@@ -1,5 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ReviewForm } from "@/components/store/ReviewForm";
+import { Stars } from "@/components/ui/Stars";
+import { REVIEWABLE_STATUSES } from "@/lib/config";
+import { getCustomer } from "@/server/auth/customer";
+import { getUserReviews } from "@/server/services/reviews";
 import { BankAccountList } from "@/components/store/BankAccountList";
 import { ReceiptUpload } from "@/components/store/ReceiptUpload";
 import { PaymentBadge } from "@/components/ui/PaymentBadge";
@@ -17,6 +22,11 @@ export default async function OrderConfirmation({ params }: PageProps<"/order/[n
   const bank = order.paymentMethod === "BANK_TRANSFER";
   const needsReceipt = bank && order.status !== "CANCELLED" && order.paymentStatus !== "VERIFIED";
   const accounts = needsReceipt ? await listBankAccounts({ activeOnly: true }) : [];
+
+  // Delivered orders can be reviewed here by the customer who placed them.
+  const user = await getCustomer();
+  const canReview = Boolean(user && order.userId === user.id && REVIEWABLE_STATUSES.includes(order.status));
+  const reviews = canReview && user ? await getUserReviews(user.id, order.items.map((i) => i.productId)) : {};
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-20 text-center">
@@ -84,6 +94,27 @@ export default async function OrderConfirmation({ params }: PageProps<"/order/[n
           Delivering to {order.address}, {order.city}. {bank ? "Payment by bank transfer." : "Payment on delivery."}
         </p>
       </div>
+
+      {canReview && (
+        <section className="mt-10 border border-line p-6 text-left" aria-labelledby="rate-heading">
+          <h2 id="rate-heading" className="text-3xl">Rate your purchase</h2>
+          <p className="mt-2 text-sm text-brown/80">Your order has arrived. Tell other customers what you think.</p>
+          <ul className="mt-6 divide-y divide-line">
+            {order.items.map((i) => {
+              const existing = reviews[i.productId];
+              return (
+                <li key={i.productId} className="py-6 first:pt-0 last:pb-0">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                    <strong className="text-sm">{i.name}</strong>
+                    {existing && <Stars value={existing.rating} className="text-lg" />}
+                  </div>
+                  <ReviewForm productId={i.productId} existing={existing ? { rating: existing.rating, note: existing.note } : null} />
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <Link href="/shop" className="mt-10 inline-block bg-brown px-10 py-4 text-xs uppercase tracking-[0.2em] text-cream hover:bg-brown-dark">
         Continue shopping

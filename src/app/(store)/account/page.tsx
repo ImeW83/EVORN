@@ -3,6 +3,8 @@ import { ProfileForm } from "@/components/account/ProfileForm";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireCustomer } from "@/server/auth/customer";
 import { money } from "@/lib/format";
+import { REVIEWABLE_STATUSES } from "@/lib/config";
+import { getUserReviews } from "@/server/services/reviews";
 import { listOrdersForUser } from "@/server/services/orders";
 import { logout } from "@/actions/store/account";
 
@@ -11,6 +13,9 @@ export const dynamic = "force-dynamic";
 export default async function AccountPage() {
   const user = await requireCustomer();
   const orders = await listOrdersForUser(user.id);
+  const reviewed = await getUserReviews(user.id, [...new Set(orders.flatMap((o) => o.items.map((i) => i.productId)))]);
+  const toReview = (o: (typeof orders)[number]) =>
+    REVIEWABLE_STATUSES.includes(o.status) ? o.items.filter((i) => !reviewed[i.productId]).length : 0;
   const { name, email, phone, address, city } = user; // never send the password hash to the browser
 
   return (
@@ -47,6 +52,11 @@ export default async function AccountPage() {
                     <p className="mt-2 text-sm text-brown/70">
                       {o.createdAt.toLocaleDateString("en-GB")} · {o.items.reduce((n, i) => n + i.quantity, 0)} item(s) · {money(o.total)}
                     </p>
+                    {toReview(o) > 0 && (
+                      <p className="mt-2 text-[11px] uppercase tracking-[0.15em] text-tan">
+                        ★ {toReview(o)} {toReview(o) === 1 ? "item" : "items"} to review
+                      </p>
+                    )}
                   </Link>
                 </li>
               ))}
