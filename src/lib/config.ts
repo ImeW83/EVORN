@@ -1,5 +1,6 @@
 export const STORE = {
   name: "EVORN",
+  tagline: "Your Everyday Accessories",
   currency: "LKR",
   // Default delivery settings; the admin can override these under Admin > Settings.
   // Flat fee, free once the subtotal reaches the threshold (0 disables free delivery).

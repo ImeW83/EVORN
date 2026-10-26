@@ -8,7 +8,8 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 md:grid-cols-3">
         <div>
           <Image src="/brand/logo-cream.png" alt="EVORN" width={990} height={260} className="h-10 w-auto" />
-          <p className="mt-4 max-w-xs text-sm text-cream/75">Timeless pieces made to be worn, gifted and treasured.</p>
+          <p className="font-display mt-4 text-xl italic text-tan">{STORE.tagline}</p>
+          <p className="mt-2 max-w-xs text-sm text-cream/75">Timeless pieces made to be worn, gifted and treasured.</p>
         </div>
         <div className="text-sm">
           <p className="mb-3 text-[11px] uppercase tracking-[0.2em] text-tan">Explore</p>

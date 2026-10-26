@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/store/ProductCard";
+import { STORE } from "@/lib/config";
 import { getCategoriesWithCounts, getFeaturedProducts } from "@/server/services/catalog";
 import { getRatings } from "@/server/services/reviews";
 
@@ -14,7 +15,7 @@ export default async function Home() {
     <>
       <section className="bg-brown text-cream">
         <div className="mx-auto flex max-w-7xl flex-col items-center px-5 py-24 text-center md:py-36">
-          <p className="text-[11px] uppercase tracking-[0.35em] text-tan">Fine jewellery</p>
+          <p className="text-[11px] uppercase tracking-[0.35em] text-tan">{STORE.tagline}</p>
           <Image
             src="/brand/logo-cream.png"
             alt="EVORN"

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { STORE } from "@/lib/config";
 import { Cormorant_Garamond, Jost } from "next/font/google";
 import "./globals.css";
 
@@ -14,8 +15,8 @@ const jost = Jost({
 });
 
 export const metadata: Metadata = {
-  title: "EVORN | Fine Jewellery",
-  description: "Timeless jewellery, delivered to your door.",
+  title: `${STORE.name} | ${STORE.tagline}`,
+  description: `${STORE.tagline}. Jewellery delivered to your door.`,
   icons: { icon: "/brand/logo-original.jpg" },
 };
 
