@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Self-contained server output, used by the Docker image.
+  output: "standalone",
   images: {
     // Product photos uploaded by the admin live on Cloudinary.
     remotePatterns: [{ protocol: "https", hostname: "res.cloudinary.com" }],

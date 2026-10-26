@@ -87,6 +87,31 @@ scripts/seed.mjs          Sample data
 
 - Email reminder a few days after delivery, linking to the order's review section (needs an email provider).
 
+## Running with Docker
+
+The image is stateless (data is in MongoDB Atlas and Cloudinary) and contains no secrets. They are read from the
+environment when the container starts. `.env` is excluded from the build by `.dockerignore`.
+
+```bash
+cp .env.example .env        # fill it in
+docker compose up -d --build
+```
+
+Or without Compose:
+
+```bash
+docker build -t evorn .
+docker run -d --name evorn -p 3000:3000 --env-file .env --restart unless-stopped evorn
+```
+
+The site is then at http://localhost:3000. Variables read at run time: `MONGODB_URI`, `CLOUDINARY_URL` (or
+`CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET`), `ADMIN_PASSWORD`, `SESSION_SECRET`, and, once
+notifications are added, `RESEND_API_KEY`, `EMAIL_FROM`, `ADMIN_NOTIFY_EMAIL`, `TEXTLK_API_TOKEN`, `TEXTLK_SENDER_ID`,
+`ADMIN_NOTIFY_PHONE`. There are no `NEXT_PUBLIC_` variables, so nothing needs to be set at build time.
+
+To update: `git pull`, then `docker compose up -d --build`. Check the container with `docker compose ps`; the healthcheck
+requests `/admin/login`, which does not need the database.
+
 ## Deploying to Vercel
 
 Set the variables from `.env.example` in the project settings. Payment receipts go through a server action, so they are

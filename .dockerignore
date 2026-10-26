@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+node_modules
+.next
+.git
+.gitignore
+*.bak
+Dockerfile
+docker-compose*.yml
+.dockerignore
+*.log
+npm-debug.log*
+tsconfig.tsbuildinfo
+prisma
+README.md
