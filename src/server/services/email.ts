@@ -29,6 +29,7 @@ export async function sendEmail({ to, subject, html }: EmailInput): Promise<Emai
         to: [to],
         subject,
         html,
+        reply_to: process.env.EMAIL_REPLY_TO || undefined,
       }),
     });
 
