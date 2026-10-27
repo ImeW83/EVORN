@@ -13,7 +13,7 @@ export default async function AdminCategories() {
       <AddCategory />
       <ul className="mt-8 divide-y divide-line border border-line">
         {categories.map((c) => (
-          <CategoryRow key={c.id} id={c.id} name={c.name} slug={c.slug} productCount={c.productCount} />
+          <CategoryRow key={c.id} id={c.id} name={c.name} slug={c.slug} productCount={c.productCount} image={c.image?.url ?? null} />
         ))}
         {categories.length === 0 && <li className="p-6 text-center text-brown/70">No categories yet.</li>}
       </ul>

@@ -10,7 +10,14 @@ const opts = { versionKey: false } as const;
 
 export const CategoryModel = define(
   "Category",
-  new Schema({ name: { type: String, required: true, trim: true }, slug: { type: String, required: true, unique: true } }, opts),
+  new Schema(
+    {
+      name: { type: String, required: true, trim: true },
+      slug: { type: String, required: true, unique: true },
+      image: { type: new Schema({ url: String, publicId: String }, { _id: false }), default: null }, // shown on the home page tile
+    },
+    opts,
+  ),
   "categories",
 );
 

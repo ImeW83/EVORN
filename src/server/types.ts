@@ -2,7 +2,7 @@ import type { OrderStatus, PaymentMethod, PaymentStatus } from "@/lib/config";
 
 // Plain, serialisable shapes returned by the services (ids are strings).
 
-export type Category = { id: string; name: string; slug: string };
+export type Category = { id: string; name: string; slug: string; image: ProductImage | null };
 
 export type Material = { id: string; name: string };
 
