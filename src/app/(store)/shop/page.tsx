@@ -55,7 +55,17 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
       </div>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[240px_1fr]">
-        <form action="/shop" className="space-y-6 self-start border border-line p-5">
+        <div className="self-start">
+        {/* On phones the filters fold behind a toggle so products show first (CSS only: checkbox + peer). */}
+        <input type="checkbox" id="filters-toggle" className="peer sr-only" />
+        <label
+          htmlFor="filters-toggle"
+          className="flex cursor-pointer items-center justify-between border border-line px-5 py-3 text-[11px] uppercase tracking-[0.2em] peer-focus-visible:outline-2 peer-focus-visible:outline-brown lg:hidden"
+        >
+          Filter &amp; sort{hasFilters && " (on)"}
+          <span aria-hidden>▾</span>
+        </label>
+        <form action="/shop" className="mt-3 hidden space-y-6 border border-line p-5 peer-checked:block lg:mt-0 lg:block">
           {category && <input type="hidden" name="category" value={category} />}
           <div>
             <label htmlFor="q" className={label}>Search</label>
@@ -97,6 +107,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
             )}
           </div>
         </form>
+        </div>
 
         {products.length === 0 ? (
           <div className="py-20 text-center">

@@ -7,6 +7,42 @@ import { getRatings } from "@/server/services/reviews";
 
 export const dynamic = "force-dynamic";
 
+// The gold ring with a diamond on top; on phones it sits under the headline instead of beside it.
+function HeroRing({ className, children }: { className: string; children?: React.ReactNode }) {
+  return (
+    <div className={className}>
+      <svg aria-hidden viewBox="0 0 440 440" className="absolute inset-0 h-full w-full text-gold" fill="none" stroke="currentColor">
+        <circle cx="220" cy="245" r="185" strokeWidth="1.5" />
+        <circle cx="220" cy="245" r="172" strokeWidth="0.75" />
+        <circle className="orbit" cx="220" cy="245" r="195" strokeWidth="1.5" strokeDasharray="1 9" strokeLinecap="round" />
+        <path d="M220 60 192 26l12-16h32l12 16-28 34Z" strokeWidth="1.5" />
+        <path d="M192 26h56M204 10l16 16 16-16M220 26v34" strokeWidth="0.75" />
+      </svg>
+      <span aria-hidden className="absolute left-[15.9%] top-[21.6%] h-[68.2%] w-[68.2%] rounded-full bg-brown-dark" />
+      {children}
+    </div>
+  );
+}
+
+// Round gold "Shop now" link with the tagline turning around its edge.
+function ShopBadge({ id, className }: { id: string; className: string }) {
+  return (
+    <Link href="/shop" aria-label="Shop now" className={`rounded-full bg-gold text-brown-dark ${className}`}>
+      <svg aria-hidden viewBox="0 0 150 150" className="spin-slow absolute inset-0 h-full w-full">
+        <defs>
+          <path id={id} d="M75 75m-56 0a56 56 0 1 1 112 0a56 56 0 1 1-112 0" />
+        </defs>
+        <text fontSize="11" fill="currentColor" textLength="346" lengthAdjust="spacing">
+          <textPath href={`#${id}`}>SHOP NOW ✦ {STORE.tagline.toUpperCase()} ✦</textPath>
+        </text>
+      </svg>
+      <svg aria-hidden viewBox="0 0 150 150" className="absolute inset-0 h-full w-full" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M62 88 88 62M70 62h18v18" />
+      </svg>
+    </Link>
+  );
+}
+
 export default async function Home() {
   const [categories, featured] = await Promise.all([getCategoriesWithCounts(), getFeaturedProducts(8)]);
   const ratings = await getRatings(featured.map((p) => p.id));
@@ -19,17 +55,7 @@ export default async function Home() {
         </p>
 
         <div className="relative mx-auto max-w-7xl px-5 py-16 md:py-24">
-          <div aria-hidden className="absolute right-5 top-1/2 hidden h-[440px] w-[440px] -translate-y-1/2 lg:block">
-            <svg viewBox="0 0 440 440" className="absolute inset-0 h-full w-full text-gold" fill="none" stroke="currentColor">
-              <circle cx="220" cy="245" r="185" strokeWidth="1.5" />
-              <circle cx="220" cy="245" r="172" strokeWidth="0.75" />
-              <circle className="orbit" cx="220" cy="245" r="195" strokeWidth="1.5" strokeDasharray="1 9" strokeLinecap="round" />
-              {/* diamond set on top of the ring */}
-              <path d="M220 60 192 26l12-16h32l12 16-28 34Z" strokeWidth="1.5" />
-              <path d="M192 26h56M204 10l16 16 16-16M220 26v34" strokeWidth="0.75" />
-            </svg>
-            <span className="absolute left-[70px] top-[95px] h-[300px] w-[300px] rounded-full bg-brown-dark" />
-          </div>
+          <HeroRing className="absolute right-5 top-1/2 hidden h-[440px] w-[440px] -translate-y-1/2 lg:block" />
 
           <div className="relative max-w-3xl">
             <p className="text-[11px] uppercase tracking-[0.4em] text-gold">✦ New season · {STORE.name}</p>
@@ -47,21 +73,12 @@ export default async function Home() {
               <Link href="/shop?sort=newest" className="border-b border-gold pb-1 text-xs uppercase tracking-[0.25em] text-gold hover:text-cream">
                 New arrivals →
               </Link>
-              <Link href="/shop" aria-label="Shop now" className="relative ml-auto hidden h-32 w-32 shrink-0 rounded-full bg-gold text-brown-dark sm:block lg:ml-4">
-                <svg aria-hidden viewBox="0 0 150 150" className="spin-slow absolute inset-0 h-full w-full">
-                  <defs>
-                    <path id="hero-ring" d="M75 75m-56 0a56 56 0 1 1 112 0a56 56 0 1 1-112 0" />
-                  </defs>
-                  <text fontSize="11" fill="currentColor" textLength="346" lengthAdjust="spacing">
-                    <textPath href="#hero-ring">SHOP NOW ✦ {STORE.tagline.toUpperCase()} ✦</textPath>
-                  </text>
-                </svg>
-                <svg aria-hidden viewBox="0 0 150 150" className="absolute inset-0 h-full w-full" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M62 88 88 62M70 62h18v18" />
-                </svg>
-              </Link>
+              <ShopBadge id="badge-path-wide" className="relative ml-4 hidden h-32 w-32 shrink-0 lg:block" />
             </div>
           </div>
+          <HeroRing className="relative mx-auto mt-12 h-64 w-64 sm:h-80 sm:w-80 lg:hidden">
+            <ShopBadge id="badge-path-narrow" className="absolute left-1/2 top-[55.7%] h-28 w-28 -translate-x-1/2 -translate-y-1/2 sm:h-32 sm:w-32" />
+          </HeroRing>
         </div>
 
         {categories.length > 0 && (

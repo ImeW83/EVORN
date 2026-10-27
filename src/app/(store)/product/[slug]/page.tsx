@@ -31,7 +31,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
         <ProductGallery images={product.images} name={product.name} />
         <div className="self-center">
           <p className="text-[11px] uppercase tracking-[0.25em] text-tan">{product.material}</p>
-          <h1 className="mt-2 text-5xl leading-tight">{product.name}</h1>
+          <h1 className="mt-2 text-4xl leading-tight md:text-5xl">{product.name}</h1>
           {rating && (
             <a href="#reviews-heading" className="mt-3 flex items-center gap-2 text-sm text-brown/80 hover:text-brown">
               <Stars value={rating.average} className="text-lg" />
