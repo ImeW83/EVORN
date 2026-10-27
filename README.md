@@ -29,8 +29,7 @@ The brand name and tagline are defined once in `STORE` in `src/lib/config.ts`.
 
 1. `npm install`
 2. Copy `.env.example` to `.env` and fill it in (MongoDB URI, Cloudinary keys, admin password, session secret; the email and SMS settings are optional, see Notifications).
-3. `node --env-file=.env scripts/seed.mjs` adds sample categories, materials and products.
-4. `npm run dev`, then open http://localhost:3000 (admin: `/admin/login`).
+3. `npm run dev`, then open http://localhost:3000 (admin: `/admin/login`).
 
 ## Project layout
 
@@ -54,7 +53,6 @@ src/
     auth/                 Admin and customer sessions
     serialize.ts, types.ts
   lib/                    Shared by server and browser: config, formatting, cart store
-scripts/seed.mjs          Sample data
 ```
 
 ## Payments
