@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { Price } from "@/components/ui/Price";
 import { requireAdmin } from "@/server/auth/admin";
 
-import { money } from "@/lib/format";
 import { listProductsWithCategory } from "@/server/services/catalog";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +35,7 @@ export default async function AdminProducts() {
                   {p.featured && <span className="ml-2 text-[10px] uppercase tracking-[0.15em] text-tan">Featured</span>}
                 </td>
                 <td className="px-4 py-3">{p.category.name}</td>
-                <td className="px-4 py-3">{money(p.price)}</td>
+                <td className="px-4 py-3"><Price price={p.price} originalPrice={p.originalPrice} /></td>
                 <td className="px-4 py-3">{p.inStock ? "In stock" : <span className="text-red-700">Sold out</span>}</td>
               </tr>
             ))}

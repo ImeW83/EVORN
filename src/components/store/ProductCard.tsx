@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { money } from "@/lib/format";
 import type { RatingSummary } from "@/server/types";
+import { Price } from "../ui/Price";
 import { Stars } from "../ui/Stars";
 import { AddToCart } from "./AddToCart";
 import { ProductImage } from "./ProductImage";
 
-type P = { id: string; slug: string; name: string; price: number; image: string | null; material: string; inStock: boolean };
+type P = { id: string; slug: string; name: string; price: number; originalPrice: number | null; image: string | null; material: string; inStock: boolean };
 
 export function ProductCard({ product, rating }: { product: P; rating?: RatingSummary }) {
   return (
@@ -22,7 +22,7 @@ export function ProductCard({ product, rating }: { product: P; rating?: RatingSu
         <Link href={`/product/${product.slug}`} className="font-display mt-1 text-xl leading-tight hover:text-brown">
           {product.name}
         </Link>
-        <p className="mt-1 text-sm text-brown">{money(product.price)}</p>
+        <Price price={product.price} originalPrice={product.originalPrice} className="mt-1 text-sm text-brown" />
         {rating && (
           <p className="mt-1 flex items-center gap-1.5 text-xs text-brown/70">
             <Stars value={rating.average} className="text-sm" />

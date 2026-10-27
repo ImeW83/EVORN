@@ -7,7 +7,7 @@ import type { Category, Material, Product } from "../types";
 // Adds the derived `image` (cover url) to a product document.
 const plainProduct = (doc: unknown): Product => {
   const p = plain<Omit<Product, "image">>(doc);
-  return { ...p, image: p.images?.[0]?.url ?? null, images: p.images ?? [] };
+  return { ...p, image: p.images?.[0]?.url ?? null, images: p.images ?? [], originalPrice: p.originalPrice ?? null };
 };
 const plainProducts = (docs: unknown[]) => docs.map(plainProduct);
 

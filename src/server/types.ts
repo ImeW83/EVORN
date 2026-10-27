@@ -14,6 +14,7 @@ export type Product = {
   slug: string;
   description: string;
   price: number;
+  originalPrice: number | null; // the price before a discount, higher than price
   material: string;
   images: ProductImage[]; // first one is the cover
   image: string | null; // cover url, derived from images

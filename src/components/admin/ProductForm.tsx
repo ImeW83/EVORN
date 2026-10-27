@@ -9,7 +9,7 @@ const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
 
 type Action = (prev: { error?: string; saved?: boolean } | undefined, f: FormData) => Promise<{ error?: string; saved?: boolean } | undefined>;
 type Product = {
-  name: string; price: number; categoryId: string; description: string; material: string;
+  name: string; price: number; originalPrice: number | null; categoryId: string; description: string; material: string;
   images: ProductImage[]; inStock: boolean; featured: boolean;
 };
 
@@ -32,9 +32,15 @@ export function ProductForm({
       </div>
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
-          <label htmlFor="price" className={label}>Price (LKR) *</label>
+          <label htmlFor="price" className={label}>Selling price (LKR) *</label>
           <input id="price" name="price" type="number" min={0} step={1} required defaultValue={product?.price} className={field} />
         </div>
+        <div>
+          <label htmlFor="originalPrice" className={label}>Original price (LKR), if discounted</label>
+          <input id="originalPrice" name="originalPrice" type="number" min={0} step={1} defaultValue={product?.originalPrice ?? undefined} placeholder="Leave empty for no discount" className={field} />
+        </div>
+      </div>
+      <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="categoryId" className={label}>Category *</label>
           <select id="categoryId" name="categoryId" required defaultValue={product?.categoryId ?? ""} className={field}>

@@ -45,12 +45,16 @@ async function parse(f: FormData) {
   const str = (k: string) => String(f.get(k) ?? "").trim();
   const name = str("name");
   const price = Math.round(Number(str("price")));
+  const original = str("originalPrice") ? Math.round(Number(str("originalPrice"))) : null;
   const categoryId = str("categoryId");
   const description = str("description");
   const material = str("material");
 
   if (!name || !description || !material) return { error: "Name, description and material are required." } as const;
   if (!Number.isFinite(price) || price < 0) return { error: "Enter a valid price." } as const;
+  if (original !== null && !(Number.isFinite(original) && original > price)) {
+    return { error: "The original price must be higher than the selling price, or left empty." } as const;
+  }
   if (!isId(categoryId) || !(await CategoryModel.exists({ _id: categoryId }))) return { error: "Choose a category." } as const;
   if (!(await MaterialModel.exists({ name: material }))) return { error: "Choose a material from the list." } as const;
 
@@ -61,6 +65,7 @@ async function parse(f: FormData) {
     data: {
       name,
       price,
+      originalPrice: original,
       categoryId,
       description,
       material,

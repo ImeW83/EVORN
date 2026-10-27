@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AddToCart } from "@/components/store/AddToCart";
+import { Price } from "@/components/ui/Price";
 import { ProductCard } from "@/components/store/ProductCard";
 import { ProductGallery } from "@/components/store/ProductGallery";
 import { ReviewsSection } from "@/components/store/ReviewsSection";
 import { Stars } from "@/components/ui/Stars";
-import { money } from "@/lib/format";
 import { getProductBySlug, getRelatedProducts } from "@/server/services/catalog";
 import { getRatings } from "@/server/services/reviews";
 
@@ -38,7 +38,7 @@ export default async function ProductPage({ params }: PageProps<"/product/[slug]
               <span>{rating.average.toFixed(1)} ({rating.count})</span>
             </a>
           )}
-          <p className="mt-4 text-2xl text-brown">{money(product.price)}</p>
+          <Price price={product.price} originalPrice={product.originalPrice} className="mt-4 text-2xl text-brown" />
           <p className="mt-6 max-w-md leading-relaxed text-brown-dark/80">{product.description}</p>
 
           <dl className="mt-8 max-w-md divide-y divide-line border-y border-line text-sm">

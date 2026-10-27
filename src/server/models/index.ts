@@ -35,6 +35,7 @@ export const ProductModel = define(
       slug: { type: String, required: true, unique: true },
       description: { type: String, required: true },
       price: { type: Number, required: true, min: 0 },
+      originalPrice: { type: Number, default: null }, // set when discounted: shown struck through next to price
       material: { type: String, required: true },
       images: { type: [new Schema({ url: String, publicId: String }, { _id: false })], default: [] },
       inStock: { type: Boolean, default: true },
