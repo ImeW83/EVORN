@@ -51,7 +51,7 @@ h1, h2, h3, .font-display {
   }
 }
 
-/* Home hero: slowly turning "Shop now" badge and the scrolling category band. */
+/* Home hero: slowly turning "Shop now" badge. */
 @keyframes spin-slow {
   to {
     rotate: 360deg;
@@ -69,34 +69,6 @@ h1, h2, h3, .font-display {
   animation: spin-slow 40s linear infinite;
 }
 
-/* Hero slider: the current slide's progress line fills over the 4-second interval. */
-@keyframes hero-progress {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
-}
-
-.hero-progress {
-  animation: hero-progress 4s linear both;
-}
-
-@keyframes marquee {
-  to {
-    translate: -50% 0;
-  }
-}
-
-.marquee {
-  animation: marquee 40s linear infinite;
-}
-
-.marquee:hover {
-  animation-play-state: paused;
-}
-
 /* Outline-only lettering in the hero and footer. */
 /* Outline-only text. Set the line colour with --outline (defaults to cream).
    The font's letters are built from overlapping shapes, so a plain stroke shows lines inside the letters.
@@ -110,8 +82,7 @@ h1, h2, h3, .font-display {
 
 @media (prefers-reduced-motion: reduce) {
   .spin-slow,
-  .orbit,
-  .marquee {
+  .orbit {
     animation: none;
   }
 }
@@ -199,5 +170,105 @@ h1, h2, h3, .font-display {
   .loader-spark,
   .loader-word {
     animation: none;
+  }
+}
+
+/* Home hero carousel (HeroCarousel). The outgoing slide blurs and slides left as it fades; the incoming one
+   arrives from the right, blurred, and sharpens. The text layer travels twice as far as the photo (parallax).
+   go-prev reverses the direction. will-change is only set while a slide is moving. */
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  --hero-shift: 8%;
+}
+
+.hero-slide.go-prev {
+  --hero-shift: -8%;
+}
+
+.hero-slide.is-idle {
+  display: none;
+}
+
+.hero-slide.is-enter {
+  z-index: 2;
+}
+
+.hero-slide.is-leave {
+  z-index: 1;
+}
+
+.hero-slide.is-enter :is(.hero-photo, .hero-text),
+.hero-slide.is-leave :is(.hero-photo, .hero-text) {
+  will-change: transform, opacity, filter;
+}
+
+.hero-slide.is-enter .hero-photo {
+  animation: hero-in 600ms ease-in-out both;
+}
+
+.hero-slide.is-enter .hero-text {
+  animation: hero-in-text 600ms ease-in-out both;
+}
+
+.hero-slide.is-leave .hero-photo {
+  animation: hero-out 600ms ease-in-out both;
+}
+
+.hero-slide.is-leave .hero-text {
+  animation: hero-out-text 600ms ease-in-out both;
+}
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--hero-shift), 0, 0);
+    filter: blur(14px);
+  }
+}
+
+@keyframes hero-in-text {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--hero-shift) * 2), 0, 0);
+    filter: blur(18px);
+  }
+}
+
+@keyframes hero-out {
+  to {
+    opacity: 0;
+    transform: translate3d(calc(var(--hero-shift) * -1), 0, 0);
+    filter: blur(14px);
+  }
+}
+
+@keyframes hero-out-text {
+  to {
+    opacity: 0;
+    transform: translate3d(calc(var(--hero-shift) * -2), 0, 0);
+    filter: blur(18px);
+  }
+}
+
+@keyframes hero-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes hero-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-slide.is-enter :is(.hero-photo, .hero-text) {
+    animation: hero-fade-in 600ms ease-in-out both;
+  }
+
+  .hero-slide.is-leave :is(.hero-photo, .hero-text) {
+    animation: hero-fade-out 600ms ease-in-out both;
   }
 }

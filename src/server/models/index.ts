@@ -1,5 +1,6 @@
 import { model, models, Schema, Types, type Model } from "mongoose";
-import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES, SLIDE_LAYOUTS } from "@/lib/config";
+import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES } from "@/lib/config";
+import { HERO_BUTTON_THEMES, HERO_FOCUS, HERO_LIMITS, HERO_SIZES, HERO_STYLES, HERO_X, HERO_Y, HEX_COLOR } from "@/lib/hero";
 
 // `models.X ?? model(...)` keeps hot reloading from re-registering a model.
 function define<T>(name: string, schema: Schema<T>, collection: string): Model<T> {
@@ -127,23 +128,38 @@ export const BankAccountModel = define(
   "bankaccounts",
 );
 
+const HeroImageSchema = new Schema(
+  { url: { type: String, required: true }, publicId: { type: String, required: true }, width: Number, height: Number },
+  { _id: false },
+);
+
 export const HeroSlideModel = define(
-  "HeroSlide",
+  "HeroCarouselSlide", // not "HeroSlide": that name belonged to an earlier slider with a different shape
   new Schema(
     {
-      image: { type: new Schema({ url: String, publicId: String }, { _id: false }), required: true },
-      eyebrow: { type: String, default: "", trim: true }, // small italic line above the title
-      title: { type: String, required: true, trim: true },
-      subtitle: { type: String, default: "", trim: true },
-      buttonLabel: { type: String, default: "Shop now", trim: true },
-      buttonLink: { type: String, default: "/shop", trim: true },
-      layout: { type: String, enum: SLIDE_LAYOUTS, default: "box" },
-      order: { type: Number, default: 0, index: true },
+      image: { type: HeroImageSchema, required: true },
+      mobileImage: { type: HeroImageSchema, default: null }, // optional 4:5 crop for phones
+      alt: { type: String, default: "", maxlength: 160 },
+      headline: { type: String, required: true, maxlength: HERO_LIMITS.headline },
+      subtext: { type: String, default: "", maxlength: HERO_LIMITS.subtext },
+      headlineStyle: { type: String, enum: HERO_STYLES, default: "serif" },
+      headlineColor: { type: String, default: "#ffffff", match: HEX_COLOR },
+      textX: { type: String, enum: HERO_X, default: "left" },
+      textY: { type: String, enum: HERO_Y, default: "middle" },
+      textSize: { type: String, enum: HERO_SIZES, default: "lg" },
+      focus: { type: String, enum: HERO_FOCUS, default: "center" }, // which part of the photo stays in view when cropped
+      button: {
+        show: { type: Boolean, default: true },
+        label: { type: String, default: "Shop now", maxlength: HERO_LIMITS.buttonLabel },
+        href: { type: String, default: "/shop" },
+        theme: { type: String, enum: HERO_BUTTON_THEMES, default: "light" },
+      },
+      sortOrder: { type: Number, default: 0, index: true },
       active: { type: Boolean, default: true },
     },
-    { ...opts, timestamps: { createdAt: true, updatedAt: false } },
+    { ...opts, timestamps: true },
   ),
-  "heroslides",
+  "hero_slides",
 );
 
 export const ReviewModel = define(

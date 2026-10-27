@@ -34,24 +34,26 @@ const uniqueName = () => `${Date.now().toString(36)}${randomBytes(4).toString("h
 type Result<T> = T | { error: string };
 
 export const PRODUCT_FOLDER = "evorn/products";
+export const HERO_FOLDER = "evorn/hero";
+type DirectFolder = typeof PRODUCT_FOLDER | typeof HERO_FOLDER;
 
-// Product photos go from the admin's browser straight to Cloudinary (several photos would not fit in one
-// server-action request). The server only signs the upload, so nobody else can upload to the account.
-export function signProductUpload() {
+// Product and hero photos go from the admin's browser straight to Cloudinary (large photos would not fit in a
+// server-action request). The server only signs the upload for one folder, so nobody else can upload to the account.
+export function signUpload(folder: DirectFolder) {
   const cfg = cloudinary.config();
   if (!configured() || !cfg.cloud_name || !cfg.api_key || !cfg.api_secret) return null;
   const timestamp = Math.round(Date.now() / 1000);
-  const signature = cloudinary.utils.api_sign_request({ folder: PRODUCT_FOLDER, timestamp }, cfg.api_secret);
-  return { cloudName: cfg.cloud_name, apiKey: cfg.api_key, folder: PRODUCT_FOLDER, timestamp, signature };
+  const signature = cloudinary.utils.api_sign_request({ folder, timestamp }, cfg.api_secret);
+  return { cloudName: cfg.cloud_name, apiKey: cfg.api_key, folder, timestamp, signature };
 }
 
-// An image reference from the browser is only trusted if it points at our own product folder.
-export function isOwnProductImage(img: { url?: unknown; publicId?: unknown }) {
+// An image reference from the browser is only trusted if it points at our own account and the expected folder.
+export function isOwnImage(img: { url?: unknown; publicId?: unknown }, folder: DirectFolder) {
   const cloud = cloudinary.config().cloud_name;
   return (
     typeof img.url === "string" &&
     typeof img.publicId === "string" &&
-    img.publicId.startsWith(`${PRODUCT_FOLDER}/`) &&
+    img.publicId.startsWith(`${folder}/`) &&
     img.url.startsWith(`https://res.cloudinary.com/${cloud}/`)
   );
 }
@@ -73,8 +75,8 @@ export async function uploadReceipt(file: File): Promise<Result<{ publicId: stri
   }
 }
 
-// Public images the admin uploads through a server action (category tiles, hero slides).
-export async function uploadImage(file: File, folder: "evorn/categories" | "evorn/hero"): Promise<Result<{ url: string; publicId: string }>> {
+// Public images the admin uploads through a server action (category tiles).
+export async function uploadImage(file: File, folder: "evorn/categories"): Promise<Result<{ url: string; publicId: string }>> {
   const invalid = validate(file);
   if (invalid) return { error: invalid };
   try {

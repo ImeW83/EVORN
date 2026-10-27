@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
-import { HeroSlider } from "@/components/store/HeroSlider";
+import { HeroCarousel } from "@/components/hero/HeroCarousel";
 import { ProductCard } from "@/components/store/ProductCard";
 import { STORE } from "@/lib/config";
 import { getCategoriesWithCounts, getFeaturedProducts } from "@/server/services/catalog";
 import { getRatings } from "@/server/services/reviews";
-import { listSlides } from "@/server/services/slides";
+import { getActiveSlides, getHeroInterval } from "@/server/services/hero";
 
 export const dynamic = "force-dynamic";
 
@@ -46,13 +46,18 @@ function ShopBadge({ id, className }: { id: string; className: string }) {
 }
 
 export default async function Home() {
-  const [categories, featured, slides] = await Promise.all([getCategoriesWithCounts(), getFeaturedProducts(8), listSlides({ activeOnly: true })]);
+  const [categories, featured, slides, interval] = await Promise.all([
+    getCategoriesWithCounts(),
+    getFeaturedProducts(8),
+    getActiveSlides(),
+    getHeroInterval(),
+  ]);
   const ratings = await getRatings(featured.map((p) => p.id));
 
   return (
     <>
       {slides.length > 0 ? (
-        <HeroSlider slides={slides} />
+        <HeroCarousel slides={slides} interval={interval} />
       ) : (
         <section className="relative overflow-hidden bg-brown text-cream">
           <p aria-hidden className="text-outline pointer-events-none absolute -left-8 top-6 select-none font-display text-[42vw] leading-none tracking-[0.05em] [--outline:color-mix(in_srgb,var(--color-cream)_20%,transparent)] lg:text-[26rem]">
@@ -87,29 +92,6 @@ export default async function Home() {
           </div>
 
         </section>
-      )}
-
-      {categories.length > 0 && (
-        <div className="relative overflow-hidden bg-gold py-3 text-brown-dark">
-          <div className="marquee flex w-max">
-            {[0, 1].map((copy) => (
-              <ul key={copy} aria-hidden={copy === 1} className="flex shrink-0 items-center">
-                {[...categories, ...categories].map((c, i) => (
-                  <li key={`${c.id}-${i}`} className="flex items-center">
-                    <Link
-                      href={`/shop?category=${c.slug}`}
-                      tabIndex={copy === 1 ? -1 : undefined}
-                      className={`font-display px-8 text-2xl hover:text-brown ${i % 2 ? "italic" : ""}`}
-                    >
-                      {c.name}
-                    </Link>
-                    <span aria-hidden className="text-sm">✦</span>
-                  </li>
-                ))}
-              </ul>
-            ))}
-          </div>
-        </div>
       )}
 
       <section className="mx-auto max-w-7xl px-5 pt-20">

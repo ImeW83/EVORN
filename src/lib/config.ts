@@ -16,16 +16,6 @@ export function calcDelivery(subtotal: number, { fee, freeOver }: { fee: number;
   return fee;
 }
 
-// Caption styles for home page hero slides; each slide picks one.
-export const SLIDE_LAYOUTS = ["box", "bottom", "split", "frame"] as const;
-export type SlideLayout = (typeof SLIDE_LAYOUTS)[number];
-export const SLIDE_LAYOUT_LABELS: Record<SlideLayout, string> = {
-  box: "Caption box on the right",
-  bottom: "Large caption at the bottom",
-  split: "Text panel beside the photo",
-  frame: "Centred in a gold frame",
-};
-
 export const ORDER_STATUSES = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"] as const;
 export type OrderStatus = (typeof ORDER_STATUSES)[number];
 

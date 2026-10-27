@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useId, useRef, useState } from "react";
 import { getUploadParams } from "@/actions/admin/products";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 import { IMAGE_TYPES } from "@/lib/config";
 import type { ProductImage } from "@/server/types";
 
@@ -54,17 +55,9 @@ export function ProductImagesField({
           if (!params) return patch(key, { error: "Image storage is not configured." });
           if (!IMAGE_TYPES.includes(file.type)) return patch(key, { error: "Use a JPG, PNG or WebP file." });
           if (file.size > MAX_BYTES) return patch(key, { error: "Larger than 10 MB." });
-          const body = new FormData();
-          body.set("file", file);
-          body.set("api_key", params.apiKey);
-          body.set("timestamp", String(params.timestamp));
-          body.set("signature", params.signature);
-          body.set("folder", params.folder);
           try {
-            const res = await fetch(`https://api.cloudinary.com/v1_1/${params.cloudName}/image/upload`, { method: "POST", body });
-            const json = await res.json();
-            if (!res.ok || !json.secure_url) throw new Error(json?.error?.message ?? "Upload failed");
-            patch(key, { url: json.secure_url, publicId: json.public_id });
+            const { url, publicId } = await uploadToCloudinary(file, params);
+            patch(key, { url, publicId });
           } catch {
             patch(key, { error: "Upload failed. Remove and try again." });
           }

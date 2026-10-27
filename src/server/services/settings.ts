@@ -1,4 +1,5 @@
 import { STORE } from "@/lib/config";
+import { HERO_INTERVAL } from "@/lib/hero";
 import { connectDb } from "../db";
 import { SettingModel } from "../models";
 
@@ -26,4 +27,17 @@ export async function saveDeliverySettings({ fee, freeOver }: DeliverySettings) 
       updateOne: { filter: { key }, update: { $set: { value: String(value) } }, upsert: true },
     })),
   );
+}
+
+// Seconds between hero slides, kept within the allowed range.
+export async function getHeroInterval() {
+  await connectDb();
+  const row = await SettingModel.findOne({ key: "heroInterval" }).lean();
+  const n = Math.round(Number(row?.value));
+  return Number.isFinite(n) && n >= HERO_INTERVAL.min && n <= HERO_INTERVAL.max ? n : HERO_INTERVAL.default;
+}
+
+export async function saveHeroInterval(seconds: number) {
+  await connectDb();
+  await SettingModel.updateOne({ key: "heroInterval" }, { $set: { value: String(seconds) } }, { upsert: true });
 }

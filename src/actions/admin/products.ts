@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin } from "@/server/auth/admin";
 import { connectDb } from "@/server/db";
 import { CategoryModel, MaterialModel, OrderModel, ProductModel, isId } from "@/server/models";
-import { deleteImage, isOwnProductImage, signProductUpload } from "@/server/services/cloudinary";
+import { PRODUCT_FOLDER, deleteImage, isOwnImage, signUpload } from "@/server/services/cloudinary";
 import type { ProductImage } from "@/server/types";
 
 type State = { error?: string; saved?: boolean } | undefined;
@@ -17,7 +17,7 @@ const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").repla
 // Signed parameters the admin's browser needs to upload a photo straight to Cloudinary.
 export async function getUploadParams() {
   await requireAdmin();
-  return signProductUpload();
+  return signUpload(PRODUCT_FOLDER);
 }
 
 async function uniqueSlug(name: string, ignoreId?: string) {
@@ -34,7 +34,7 @@ function parseImages(raw: string): ProductImage[] | null {
   try {
     const list: unknown = JSON.parse(raw || "[]");
     if (!Array.isArray(list) || list.length > MAX_IMAGES) return null;
-    if (!list.every((i) => i && isOwnProductImage(i))) return null;
+    if (!list.every((i) => i && isOwnImage(i, PRODUCT_FOLDER))) return null;
     return list.map((i) => ({ url: i.url, publicId: i.publicId }));
   } catch {
     return null;
