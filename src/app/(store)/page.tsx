@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HeroSlider } from "@/components/store/HeroSlider";
 import { ProductCard } from "@/components/store/ProductCard";
 import { STORE } from "@/lib/config";
 import { getCategoriesWithCounts, getFeaturedProducts } from "@/server/services/catalog";
 import { getRatings } from "@/server/services/reviews";
+import { listSlides } from "@/server/services/slides";
 
 export const dynamic = "force-dynamic";
 
@@ -44,66 +46,71 @@ function ShopBadge({ id, className }: { id: string; className: string }) {
 }
 
 export default async function Home() {
-  const [categories, featured] = await Promise.all([getCategoriesWithCounts(), getFeaturedProducts(8)]);
+  const [categories, featured, slides] = await Promise.all([getCategoriesWithCounts(), getFeaturedProducts(8), listSlides({ activeOnly: true })]);
   const ratings = await getRatings(featured.map((p) => p.id));
 
   return (
     <>
-      <section className="relative overflow-hidden bg-brown text-cream">
-        <p aria-hidden className="text-outline pointer-events-none absolute -left-8 top-6 select-none font-display text-[42vw] leading-none tracking-[0.05em] [--outline:color-mix(in_srgb,var(--color-cream)_20%,transparent)] lg:text-[26rem]">
-          {STORE.name}
-        </p>
+      {slides.length > 0 ? (
+        <HeroSlider slides={slides} />
+      ) : (
+        <section className="relative overflow-hidden bg-brown text-cream">
+          <p aria-hidden className="text-outline pointer-events-none absolute -left-8 top-6 select-none font-display text-[42vw] leading-none tracking-[0.05em] [--outline:color-mix(in_srgb,var(--color-cream)_20%,transparent)] lg:text-[26rem]">
+            {STORE.name}
+          </p>
 
-        <div className="relative mx-auto max-w-7xl px-5 py-16 md:py-24">
-          <HeroRing className="absolute right-5 top-1/2 hidden h-[440px] w-[440px] -translate-y-1/2 lg:block" />
+          <div className="relative mx-auto max-w-7xl px-5 py-16 md:py-24">
+            <HeroRing className="absolute right-5 top-1/2 hidden h-[440px] w-[440px] -translate-y-1/2 lg:block" />
 
-          <div className="relative max-w-3xl">
-            <p className="text-[11px] uppercase tracking-[0.4em] text-gold">✦ New season · {STORE.name}</p>
-            <p className="font-display mt-5 text-5xl font-light italic leading-[0.95] text-gold md:text-7xl lg:text-8xl">Your Everyday</p>
-            <h1 className="mt-1 whitespace-nowrap text-[12.5vw] font-normal leading-[0.9] tracking-[0.06em] lg:text-[8.5rem] xl:text-[9.5rem]">
-              ACCESS<span className="text-outline">ORIES</span>
-            </h1>
-            <div className="mt-10 flex flex-wrap items-center gap-6">
-              <Link
-                href="/shop"
-                className="bg-cream px-10 py-5 text-xs uppercase tracking-[0.28em] text-brown-dark transition hover:bg-gold"
-              >
-                Shop the collection
-              </Link>
-              <Link href="/shop?sort=newest" className="border-b border-gold pb-1 text-xs uppercase tracking-[0.25em] text-gold hover:text-cream">
-                New arrivals →
-              </Link>
-              <ShopBadge id="badge-path-wide" className="relative ml-4 hidden h-32 w-32 shrink-0 lg:block" />
+            <div className="relative max-w-3xl">
+              <p className="text-[11px] uppercase tracking-[0.4em] text-gold">✦ New season · {STORE.name}</p>
+              <p className="font-display mt-5 text-5xl font-light italic leading-[0.95] text-gold md:text-7xl lg:text-8xl">Your Everyday</p>
+              <h1 className="mt-1 whitespace-nowrap text-[12.5vw] font-normal leading-[0.9] tracking-[0.06em] lg:text-[8.5rem] xl:text-[9.5rem]">
+                ACCESS<span className="text-outline">ORIES</span>
+              </h1>
+              <div className="mt-10 flex flex-wrap items-center gap-6">
+                <Link
+                  href="/shop"
+                  className="bg-cream px-10 py-5 text-xs uppercase tracking-[0.28em] text-brown-dark transition hover:bg-gold"
+                >
+                  Shop the collection
+                </Link>
+                <Link href="/shop?sort=newest" className="border-b border-gold pb-1 text-xs uppercase tracking-[0.25em] text-gold hover:text-cream">
+                  New arrivals →
+                </Link>
+                <ShopBadge id="badge-path-wide" className="relative ml-4 hidden h-32 w-32 shrink-0 lg:block" />
+              </div>
             </div>
+            <HeroRing className="relative mx-auto mt-12 h-64 w-64 sm:h-80 sm:w-80 lg:hidden">
+              <ShopBadge id="badge-path-narrow" className="absolute left-1/2 top-[55.7%] h-28 w-28 -translate-x-1/2 -translate-y-1/2 sm:h-32 sm:w-32" />
+            </HeroRing>
           </div>
-          <HeroRing className="relative mx-auto mt-12 h-64 w-64 sm:h-80 sm:w-80 lg:hidden">
-            <ShopBadge id="badge-path-narrow" className="absolute left-1/2 top-[55.7%] h-28 w-28 -translate-x-1/2 -translate-y-1/2 sm:h-32 sm:w-32" />
-          </HeroRing>
+
+        </section>
+      )}
+
+      {categories.length > 0 && (
+        <div className="relative overflow-hidden bg-gold py-3 text-brown-dark">
+          <div className="marquee flex w-max">
+            {[0, 1].map((copy) => (
+              <ul key={copy} aria-hidden={copy === 1} className="flex shrink-0 items-center">
+                {[...categories, ...categories].map((c, i) => (
+                  <li key={`${c.id}-${i}`} className="flex items-center">
+                    <Link
+                      href={`/shop?category=${c.slug}`}
+                      tabIndex={copy === 1 ? -1 : undefined}
+                      className={`font-display px-8 text-2xl hover:text-brown ${i % 2 ? "italic" : ""}`}
+                    >
+                      {c.name}
+                    </Link>
+                    <span aria-hidden className="text-sm">✦</span>
+                  </li>
+                ))}
+              </ul>
+            ))}
+          </div>
         </div>
-
-        {categories.length > 0 && (
-          <div className="relative overflow-hidden bg-gold py-3 text-brown-dark">
-            <div className="marquee flex w-max">
-              {[0, 1].map((copy) => (
-                <ul key={copy} aria-hidden={copy === 1} className="flex shrink-0 items-center">
-                  {[...categories, ...categories].map((c, i) => (
-                    <li key={`${c.id}-${i}`} className="flex items-center">
-                      <Link
-                        href={`/shop?category=${c.slug}`}
-                        tabIndex={copy === 1 ? -1 : undefined}
-                        className={`font-display px-8 text-2xl hover:text-brown ${i % 2 ? "italic" : ""}`}
-                      >
-                        {c.name}
-                      </Link>
-                      <span aria-hidden className="text-sm">✦</span>
-                    </li>
-                  ))}
-                </ul>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
+      )}
 
       <section className="mx-auto max-w-7xl px-5 pt-20">
         <h2 className="text-center text-4xl">Shop by category</h2>

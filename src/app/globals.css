@@ -69,6 +69,20 @@ h1, h2, h3, .font-display {
   animation: spin-slow 40s linear infinite;
 }
 
+/* Hero slider: the current slide's progress line fills over the 4-second interval. */
+@keyframes hero-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.hero-progress {
+  animation: hero-progress 4s linear both;
+}
+
 @keyframes marquee {
   to {
     translate: -50% 0;

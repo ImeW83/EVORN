@@ -1,5 +1,5 @@
 import { model, models, Schema, Types, type Model } from "mongoose";
-import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES } from "@/lib/config";
+import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES, SLIDE_LAYOUTS } from "@/lib/config";
 
 // `models.X ?? model(...)` keeps hot reloading from re-registering a model.
 function define<T>(name: string, schema: Schema<T>, collection: string): Model<T> {
@@ -125,6 +125,25 @@ export const BankAccountModel = define(
     { ...opts, timestamps: { createdAt: true, updatedAt: false } },
   ),
   "bankaccounts",
+);
+
+export const HeroSlideModel = define(
+  "HeroSlide",
+  new Schema(
+    {
+      image: { type: new Schema({ url: String, publicId: String }, { _id: false }), required: true },
+      eyebrow: { type: String, default: "", trim: true }, // small italic line above the title
+      title: { type: String, required: true, trim: true },
+      subtitle: { type: String, default: "", trim: true },
+      buttonLabel: { type: String, default: "Shop now", trim: true },
+      buttonLink: { type: String, default: "/shop", trim: true },
+      layout: { type: String, enum: SLIDE_LAYOUTS, default: "box" },
+      order: { type: Number, default: 0, index: true },
+      active: { type: Boolean, default: true },
+    },
+    { ...opts, timestamps: { createdAt: true, updatedAt: false } },
+  ),
+  "heroslides",
 );
 
 export const ReviewModel = define(

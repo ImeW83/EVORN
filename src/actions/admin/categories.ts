@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/server/auth/admin";
 import { connectDb } from "@/server/db";
 import { CategoryModel, ProductModel, isId } from "@/server/models";
-import { deleteImage, uploadCategoryImage } from "@/server/services/cloudinary";
+import { deleteImage, uploadImage } from "@/server/services/cloudinary";
 
 type State = { error?: string; saved?: boolean } | undefined;
 
@@ -62,7 +62,7 @@ export async function setCategoryImage(id: string, _prev: State, f: FormData): P
   await connectDb();
   const category = await CategoryModel.findById(id);
   if (!category) return { error: "Category not found." };
-  const uploaded = await uploadCategoryImage(file);
+  const uploaded = await uploadImage(file, "evorn/categories");
   if ("error" in uploaded) return { error: uploaded.error };
   const old = category.image?.publicId;
   category.image = { url: uploaded.url, publicId: uploaded.publicId };

@@ -1,4 +1,4 @@
-import type { OrderStatus, PaymentMethod, PaymentStatus } from "@/lib/config";
+import type { OrderStatus, PaymentMethod, PaymentStatus, SlideLayout } from "@/lib/config";
 
 // Plain, serialisable shapes returned by the services (ids are strings).
 
@@ -80,3 +80,16 @@ export type Review = {
 };
 
 export type RatingSummary = { average: number; count: number };
+
+export type HeroSlide = {
+  id: string;
+  image: ProductImage;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  buttonLabel: string;
+  buttonLink: string;
+  layout: SlideLayout;
+  order: number;
+  active: boolean;
+};

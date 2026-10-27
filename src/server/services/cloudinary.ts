@@ -73,14 +73,15 @@ export async function uploadReceipt(file: File): Promise<Result<{ publicId: stri
   }
 }
 
-export async function uploadCategoryImage(file: File): Promise<Result<{ url: string; publicId: string }>> {
+// Public images the admin uploads through a server action (category tiles, hero slides).
+export async function uploadImage(file: File, folder: "evorn/categories" | "evorn/hero"): Promise<Result<{ url: string; publicId: string }>> {
   const invalid = validate(file);
   if (invalid) return { error: invalid };
   try {
-    const r = await upload(Buffer.from(await file.arrayBuffer()), { folder: "evorn/categories", public_id: uniqueName() });
+    const r = await upload(Buffer.from(await file.arrayBuffer()), { folder, public_id: uniqueName() });
     return { url: r.secure_url, publicId: r.public_id };
   } catch (e) {
-    console.error("Cloudinary category image upload failed:", e);
+    console.error("Cloudinary image upload failed:", e);
     return { error: "Image upload failed. Please try again." };
   }
 }
