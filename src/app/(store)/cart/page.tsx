@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PageBackdrop } from "@/components/store/PageBackdrop";
 import { OrderSummary } from "@/components/store/OrderSummary";
 import { ProductImage } from "@/components/store/ProductImage";
 import { cart, useCart } from "@/lib/cart";
@@ -11,18 +12,23 @@ export default function CartPage() {
 
   if (lines.length === 0) {
     return (
-      <div className="mx-auto max-w-7xl px-5 py-28 text-center">
+      <div className="relative overflow-hidden">
+        <PageBackdrop />
+      <div className="relative mx-auto max-w-7xl px-5 py-28 text-center">
         <h1 className="text-5xl">Your cart is empty</h1>
         <p className="mt-3 text-brown/70">Discover something you will love.</p>
         <Link href="/shop" className="mt-8 inline-block bg-brown px-10 py-4 text-xs uppercase tracking-[0.2em] text-cream hover:bg-brown-dark">
           Continue shopping
         </Link>
       </div>
+      </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-5 py-12">
+    <div className="relative overflow-hidden">
+      <PageBackdrop />
+    <div className="relative mx-auto max-w-7xl px-5 py-12">
       <h1 className="text-5xl">Your cart</h1>
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_380px]">
         <ul className="divide-y divide-line border-y border-line">
@@ -63,6 +69,7 @@ export default function CartPage() {
           </Link>
         </OrderSummary>
       </div>
+    </div>
     </div>
   );
 }

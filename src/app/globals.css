@@ -6,6 +6,7 @@
   --color-cream: #fbf3e8;
   --color-sand: #efe2d0;
   --color-tan: #c9a27a;
+  --color-gold: #e0bd92;
   --color-line: #e3d3bf;
   --font-sans: var(--font-jost);
   --font-serif: var(--font-cormorant);
@@ -46,6 +47,143 @@ h1, h2, h3, .font-display {
 
 @media (prefers-reduced-motion: reduce) {
   .lb-swap {
+    animation: none;
+  }
+}
+
+/* Home hero: slowly turning "Shop now" badge and the scrolling category band. */
+@keyframes spin-slow {
+  to {
+    rotate: 360deg;
+  }
+}
+
+.spin-slow {
+  animation: spin-slow 18s linear infinite;
+}
+
+/* Dotted circle around the hero ring, turning slowly around its own centre. */
+.orbit {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin-slow 40s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    translate: -50% 0;
+  }
+}
+
+.marquee {
+  animation: marquee 40s linear infinite;
+}
+
+.marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Outline-only lettering in the hero and footer. */
+/* Outline-only text. Set the line colour with --outline (defaults to cream).
+   The font's letters are built from overlapping shapes, so a plain stroke shows lines inside the letters.
+   Instead the stroke is drawn first and the letters are filled on top with the background colour
+   (--outline-fill, brown by default), which hides the inner lines and leaves a clean outer outline. */
+.text-outline {
+  color: var(--outline-fill, var(--color-brown));
+  -webkit-text-stroke: 3px var(--outline, var(--color-cream));
+  paint-order: stroke fill;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin-slow,
+  .orbit,
+  .marquee {
+    animation: none;
+  }
+}
+
+/* Store loading screen: the hero's ring draws itself, then the diamond settles on top. */
+@keyframes loader-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes loader-draw {
+  0% {
+    stroke-dashoffset: 1200;
+  }
+  55%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes loader-gem {
+  0%,
+  45% {
+    opacity: 0;
+    translate: 0 -8px;
+  }
+  65%,
+  100% {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes loader-spark {
+  0%,
+  60%,
+  100% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  75% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes loader-word {
+  0%,
+  50% {
+    opacity: 0;
+  }
+  80%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.loader {
+  animation: loader-in 300ms ease 200ms both;
+}
+
+.loader-ring {
+  stroke-dasharray: 1200;
+  animation: loader-draw 2.6s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+}
+
+.loader-gem {
+  animation: loader-gem 2.6s ease infinite;
+}
+
+.loader-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: loader-spark 2.6s ease infinite;
+}
+
+.loader-word {
+  animation: loader-word 2.6s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-ring,
+  .loader-gem,
+  .loader-spark,
+  .loader-word {
     animation: none;
   }
 }
