@@ -31,7 +31,7 @@ export function SearchBox() {
         aria-label={open ? "Close search" : "Search"}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="hover:text-tan"
+        className="flex items-center hover:text-tan"
       >
         <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
           <circle cx="11" cy="11" r="6.5" />
