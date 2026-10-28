@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import type { ProductImage } from "@/server/types";
 import { ProductImagesField } from "./ProductImagesField";
 
-const field = "w-full border border-line bg-cream px-4 py-3 text-sm outline-none focus:border-brown";
+const field = "w-full border border-line bg-pearl px-4 py-3 text-sm outline-none focus:border-brown";
 const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
 
 type Action = (prev: { error?: string; saved?: boolean } | undefined, f: FormData) => Promise<{ error?: string; saved?: boolean } | undefined>;

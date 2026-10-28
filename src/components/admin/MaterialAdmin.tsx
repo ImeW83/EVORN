@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { createMaterial, deleteMaterial, renameMaterial } from "@/actions/admin/materials";
 
-const field = "border border-line bg-cream px-4 py-2.5 text-sm outline-none focus:border-brown";
+const field = "border border-line bg-pearl px-4 py-2.5 text-sm outline-none focus:border-brown";
 const btn = "bg-brown px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-cream hover:bg-brown-dark disabled:opacity-60";
 
 export function AddMaterial() {

@@ -24,7 +24,7 @@ import {
   type HeroSlideContent,
 } from "@/lib/hero";
 
-const field = "w-full border border-line bg-cream px-3 py-2.5 text-sm outline-none focus:border-brown";
+const field = "w-full border border-line bg-pearl px-3 py-2.5 text-sm outline-none focus:border-brown";
 const label = "mb-1 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
 const btn = "bg-brown px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-cream hover:bg-brown-dark disabled:opacity-60";
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -221,7 +221,7 @@ export function SlideForm({ slide, full }: { slide?: HeroSlide; full: boolean })
           <label className={label}>
             Headline colour
             <span className="mt-1 flex gap-2">
-              <input type="color" name="headlineColor" value={v.headlineColor} onChange={(e) => set("headlineColor", e.target.value)} className="h-10 w-14 border border-line bg-cream" />
+              <input type="color" name="headlineColor" value={v.headlineColor} onChange={(e) => set("headlineColor", e.target.value)} className="h-10 w-14 border border-line bg-pearl" />
               <span className="self-center font-mono text-xs normal-case tracking-normal">{v.headlineColor}</span>
             </span>
           </label>

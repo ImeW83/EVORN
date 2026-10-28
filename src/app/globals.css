@@ -4,6 +4,7 @@
   --color-brown: #5f3423;
   --color-brown-dark: #43251a;
   --color-cream: #fbf3e8;
+  --color-pearl: #f8f6f0;
   --color-sand: #efe2d0;
   --color-tan: #c9a27a;
   --color-gold: #e0bd92;
@@ -13,7 +14,7 @@
 }
 
 body {
-  background: var(--color-cream);
+  background: var(--color-pearl);
   color: var(--color-brown-dark);
   font-family: var(--font-jost), system-ui, sans-serif;
 }

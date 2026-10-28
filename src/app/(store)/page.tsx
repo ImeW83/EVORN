@@ -76,7 +76,7 @@ export default async function Home() {
               <div className="mt-10 flex flex-wrap items-center gap-6">
                 <Link
                   href="/shop"
-                  className="bg-cream px-10 py-5 text-xs uppercase tracking-[0.28em] text-brown-dark transition hover:bg-gold"
+                  className="bg-pearl px-10 py-5 text-xs uppercase tracking-[0.28em] text-brown-dark transition hover:bg-gold"
                 >
                   Shop the collection
                 </Link>

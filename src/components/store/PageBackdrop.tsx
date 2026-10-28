@@ -5,7 +5,7 @@ import { STORE } from "@/lib/config";
 export function PageBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 select-none">
-      <p className="text-outline font-display absolute bottom-0 -left-6 text-[38vw] leading-none tracking-[0.05em] [--outline-fill:var(--color-cream)] [--outline:color-mix(in_srgb,var(--color-tan)_55%,transparent)] lg:text-[22rem]">
+      <p className="text-outline font-display absolute bottom-0 -left-6 text-[38vw] leading-none tracking-[0.05em] [--outline-fill:var(--color-pearl)] [--outline:color-mix(in_srgb,var(--color-tan)_55%,transparent)] lg:text-[22rem]">
         {STORE.name}
       </p>
       <svg viewBox="0 0 440 440" className="absolute -right-24 -top-10 hidden h-[460px] w-[460px] text-tan/80 md:block" fill="none" stroke="currentColor">

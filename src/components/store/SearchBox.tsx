@@ -49,7 +49,7 @@ export function SearchBox() {
               aria-label="Search jewellery"
               className="min-w-0 flex-1 border border-cream/30 bg-transparent px-4 py-2.5 text-sm normal-case tracking-normal text-cream outline-none placeholder:text-cream/50 focus:border-tan"
             />
-            <button className="bg-tan px-6 text-[11px] uppercase tracking-[0.2em] text-brown-dark hover:bg-cream">Search</button>
+            <button className="bg-tan px-6 text-[11px] uppercase tracking-[0.2em] text-brown-dark hover:bg-pearl">Search</button>
           </div>
         </form>
       )}

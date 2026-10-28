@@ -79,7 +79,7 @@ export function ProductImagesField({
 
   const remove = (key: string) => setTiles((all) => all.filter((t) => t.key !== key));
 
-  const small = "h-8 w-8 border border-line bg-cream text-sm hover:bg-sand disabled:opacity-40";
+  const small = "h-8 w-8 border border-line bg-pearl text-sm hover:bg-sand disabled:opacity-40";
 
   return (
     <div>

@@ -108,11 +108,11 @@ export function ProductGallery({ images, name }: { images: Img[]; name: string }
 
         {n > 1 && (
           <>
-            <button type="button" onClick={() => go(-1)} aria-label="Previous photo" className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-cream/90 text-brown shadow transition hover:bg-brown hover:text-cream">←</button>
-            <button type="button" onClick={() => go(1)} aria-label="Next photo" className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-cream/90 text-brown shadow transition hover:bg-brown hover:text-cream">→</button>
+            <button type="button" onClick={() => go(-1)} aria-label="Previous photo" className="absolute left-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-pearl/90 text-brown shadow transition hover:bg-brown hover:text-cream">←</button>
+            <button type="button" onClick={() => go(1)} aria-label="Next photo" className="absolute right-3 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-pearl/90 text-brown shadow transition hover:bg-brown hover:text-cream">→</button>
           </>
         )}
-        <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 bg-cream/85 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-brown">
+        <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 bg-pearl/85 px-3 py-1 text-[10px] uppercase tracking-[0.25em] text-brown">
           Click to enlarge
         </p>
       </div>

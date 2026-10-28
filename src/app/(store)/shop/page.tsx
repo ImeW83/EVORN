@@ -28,7 +28,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
   const hasFilters = Boolean(material || q || min || max);
   const href = (slug?: string) => (slug ? `/shop?category=${slug}` : "/shop");
 
-  const field = "w-full border border-line bg-cream px-3 py-2.5 text-sm outline-none focus:border-brown";
+  const field = "w-full border border-line bg-pearl px-3 py-2.5 text-sm outline-none focus:border-brown";
   const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-tan";
 
   return (

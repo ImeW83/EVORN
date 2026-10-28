@@ -34,7 +34,7 @@ export function ReviewForm({ productId, existing }: { productId: string; existin
           maxLength={MAX_REVIEW_NOTE}
           defaultValue={existing?.note}
           placeholder="What did you think of the piece?"
-          className="w-full border border-line bg-cream px-4 py-3 text-sm outline-none focus:border-brown"
+          className="w-full border border-line bg-pearl px-4 py-3 text-sm outline-none focus:border-brown"
         />
       </div>
 

@@ -4,7 +4,7 @@ export function BankAccountList({ accounts }: { accounts: BankAccount[] }) {
   return (
     <ul className="space-y-3">
       {accounts.map((a) => (
-        <li key={a.id} className="border border-line bg-cream p-4 text-sm">
+        <li key={a.id} className="border border-line bg-pearl p-4 text-sm">
           <p className="font-medium">{a.bank}</p>
           <dl className="mt-2 grid grid-cols-[110px_1fr] gap-y-1">
             <dt className="text-brown/70">Account name</dt>

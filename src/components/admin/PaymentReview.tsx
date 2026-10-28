@@ -15,7 +15,7 @@ export function PaymentReview({ orderId }: { orderId: string }) {
       </form>
       <form action={reject} className="space-y-2 border-t border-line pt-4">
         <label htmlFor="note" className="block text-[11px] uppercase tracking-[0.2em] text-brown/80">Or reject the receipt</label>
-        <textarea id="note" name="note" rows={2} required placeholder="Reason shown to the customer, e.g. amount does not match" className="w-full border border-line bg-cream px-3 py-2 text-sm" />
+        <textarea id="note" name="note" rows={2} required placeholder="Reason shown to the customer, e.g. amount does not match" className="w-full border border-line bg-pearl px-3 py-2 text-sm" />
         {state?.error && <p role="alert" className="text-sm text-red-700">{state.error}</p>}
         <button disabled={pending} className="border border-red-700 px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-red-700 hover:bg-red-50 disabled:opacity-60">
           Reject receipt

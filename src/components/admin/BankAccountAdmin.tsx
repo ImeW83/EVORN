@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { createBankAccount, deleteBankAccount, updateBankAccount } from "@/actions/admin/bank-accounts";
 import type { BankAccount } from "@/server/types";
 
-const field = "w-full border border-line bg-cream px-3 py-2.5 text-sm outline-none focus:border-brown";
+const field = "w-full border border-line bg-pearl px-3 py-2.5 text-sm outline-none focus:border-brown";
 const label = "mb-1 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
 const btn = "bg-brown px-5 py-2.5 text-[11px] uppercase tracking-[0.2em] text-cream hover:bg-brown-dark disabled:opacity-60";
 

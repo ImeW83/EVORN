@@ -36,7 +36,7 @@ export function HeroSlideView({ slide, loading = "lazy", priority = false }: { s
   const style = STYLE[slide.headlineStyle];
   const external = slide.button.href.startsWith("https://");
   const buttonClass = `pointer-events-auto absolute bottom-[9%] left-1/2 inline-flex min-h-11 -translate-x-1/2 items-center px-7 text-[11px] font-medium uppercase tracking-[0.3em] transition-colors ${
-    slide.button.theme === "light" ? "bg-white text-neutral-900 hover:bg-neutral-900 hover:text-white" : "bg-brown-dark text-cream hover:bg-cream hover:text-brown-dark"
+    slide.button.theme === "light" ? "bg-white text-neutral-900 hover:bg-neutral-900 hover:text-white" : "bg-brown-dark text-cream hover:bg-pearl hover:text-brown-dark"
   }`;
 
   return (

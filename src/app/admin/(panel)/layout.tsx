@@ -6,7 +6,7 @@ import { logout } from "@/actions/admin/auth";
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   await requireAdmin();
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-pearl">
       <header className="bg-brown text-cream">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
           <Link href="/admin" className="flex items-center gap-4">

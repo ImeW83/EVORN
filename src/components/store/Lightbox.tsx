@@ -135,7 +135,7 @@ export function Lightbox({
   const image = images[index];
 
   const control =
-    "flex h-11 w-11 items-center justify-center rounded-full border border-cream/30 bg-brown-dark/50 text-lg text-cream backdrop-blur transition hover:bg-cream hover:text-brown focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
+    "flex h-11 w-11 items-center justify-center rounded-full border border-cream/30 bg-brown-dark/50 text-lg text-cream backdrop-blur transition hover:bg-pearl hover:text-brown focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cream";
 
   return (
     <div

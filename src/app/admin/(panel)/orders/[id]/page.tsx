@@ -125,7 +125,7 @@ export default async function OrderDetails({ params }: PageProps<"/admin/orders/
           <section className={box}>
             <h2 className={h}>Update status</h2>
             <form action={updateOrderStatus.bind(null, order.id)} className="flex gap-2">
-              <select name="status" defaultValue={order.status} className="flex-1 border border-line bg-cream px-3 py-2.5 text-sm">
+              <select name="status" defaultValue={order.status} className="flex-1 border border-line bg-pearl px-3 py-2.5 text-sm">
                 {ORDER_STATUSES.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
