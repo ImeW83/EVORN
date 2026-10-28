@@ -7,7 +7,12 @@ export const STORE = {
   deliveryFee: 450,
   freeDeliveryOver: 100000,
   contactEmail: "hello@evorn.lk",
-  contactPhone: "+94 77 000 0000",
+  contactPhone: "+94 77 030 1659",
+  socials: {
+    instagram: "https://www.instagram.com/evorn.lk",
+    facebook: "https://www.facebook.com/share/14sw7oCcDyh/",
+    tiktok: "https://www.tiktok.com/@evorn_accessories",
+  },
 };
 
 export function calcDelivery(subtotal: number, { fee, freeOver }: { fee: number; freeOver: number }) {
