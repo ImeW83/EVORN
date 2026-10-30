@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { saveSettings } from "@/actions/admin/settings";
+import { keepValues } from "@/lib/forms";
 
 const field = "w-full border border-line bg-pearl px-4 py-3 text-sm outline-none focus:border-brown";
 const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
@@ -9,7 +10,7 @@ const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
 export function SettingsForm({ fee, freeOver }: { fee: number; freeOver: number }) {
   const [state, action, pending] = useActionState(saveSettings, undefined);
   return (
-    <form action={action} className="mt-8 max-w-md space-y-5">
+    <form action={action} onSubmit={keepValues(action)} className="mt-8 max-w-md space-y-5">
       <div>
         <label htmlFor="deliveryFee" className={label}>Delivery fee (LKR)</label>
         <input id="deliveryFee" name="deliveryFee" type="number" min={0} step={1} required defaultValue={fee} className={field} />

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { STORE } from "@/lib/config";
+import { keepValues } from "@/lib/forms";
 
 const field = "w-full border border-line bg-pearl px-4 py-3 text-sm outline-none focus:border-brown";
 const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
@@ -37,7 +38,7 @@ export function AuthForm({ mode, action, next }: { mode: "login" | "signup"; act
       </aside>
     <div className="mx-auto w-full max-w-md self-center px-5 py-16">
       <h1 className="text-5xl">{signup ? "Create account" : "Welcome back"}</h1>
-      <form action={run} className="mt-8 space-y-5">
+      <form action={run} onSubmit={keepValues(run)} className="mt-8 space-y-5">
         <input type="hidden" name="next" value={next} />
         {signup && (
           <div>

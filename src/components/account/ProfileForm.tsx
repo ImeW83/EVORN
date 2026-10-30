@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { updateProfile } from "@/actions/store/account";
 import { PHONE_HINT } from "@/lib/phone";
+import { keepValues } from "@/lib/forms";
 
 const field = "w-full border border-line bg-pearl px-4 py-3 text-sm outline-none focus:border-brown";
 const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80";
@@ -12,7 +13,7 @@ type Profile = { name: string; email: string; phone: string | null; address: str
 export function ProfileForm({ user }: { user: Profile }) {
   const [state, action, pending] = useActionState(updateProfile, undefined);
   return (
-    <form action={action} className="mt-6 space-y-5">
+    <form action={action} onSubmit={keepValues(action)} className="mt-6 space-y-5">
       <div>
         <label htmlFor="email" className={label}>Email</label>
         <input id="email" value={user.email} disabled className={`${field} opacity-60`} />

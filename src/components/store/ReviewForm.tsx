@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { submitReview } from "@/actions/store/reviews";
 import { MAX_REVIEW_NOTE } from "@/lib/config";
+import { keepValues } from "@/lib/forms";
 
 export function ReviewForm({ productId, existing }: { productId: string; existing: { rating: number; note: string } | null }) {
   const [state, action, pending] = useActionState(submitReview.bind(null, productId), undefined);
@@ -11,7 +12,7 @@ export function ReviewForm({ productId, existing }: { productId: string; existin
   const shown = hover || rating;
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} onSubmit={keepValues(action)} className="space-y-4">
       <fieldset onMouseLeave={() => setHover(0)}>
         <legend className="mb-2 text-[11px] uppercase tracking-[0.2em] text-brown/80">Your rating</legend>
         <div className="flex gap-1 text-3xl leading-none">
