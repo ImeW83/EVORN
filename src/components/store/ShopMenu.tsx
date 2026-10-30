@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-export function ShopMenu({ categories }: { categories: { id: string; name: string; slug: string }[] }) {
+type Section = { slug: string; name: string; categories: { id: string; name: string; slug: string }[] };
+
+// Shop dropdown: a column for each section (Ladies, Men) listing the categories that have pieces in it.
+export function ShopMenu({ sections }: { sections: Section[] }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -36,20 +39,32 @@ export function ShopMenu({ categories }: { categories: { id: string; name: strin
         </svg>
       </button>
       {open && (
-        <ul role="menu" className="absolute left-0 top-full z-50 min-w-48 border border-cream/15 bg-brown py-2 shadow-lg">
-          <li role="none">
-            <Link role="menuitem" href="/shop" onClick={() => setOpen(false)} className="block px-5 py-2.5 hover:bg-brown-dark hover:text-tan">
-              All jewellery
-            </Link>
-          </li>
-          {categories.map((c) => (
-            <li key={c.id} role="none">
-              <Link role="menuitem" href={`/shop?category=${c.slug}`} onClick={() => setOpen(false)} className="block px-5 py-2.5 hover:bg-brown-dark hover:text-tan">
-                {c.name}
-              </Link>
-            </li>
+        <div
+          role="menu"
+          className="absolute left-1/2 top-full z-50 grid max-h-[70svh] w-max max-w-[calc(100vw-2.5rem)] -translate-x-1/2 grid-cols-2 overflow-y-auto border border-cream/15 bg-brown py-3 shadow-lg md:left-0 md:translate-x-0"
+        >
+          {sections.map((s) => (
+            <ul key={s.slug} role="group" aria-label={s.name} className="min-w-40 border-cream/15 [&+&]:border-l">
+              <li role="none">
+                <Link role="menuitem" href={`/shop?for=${s.slug}`} onClick={() => setOpen(false)} className="block px-5 py-2.5 font-display text-lg normal-case tracking-normal text-gold hover:text-cream">
+                  {s.name}
+                </Link>
+              </li>
+              {s.categories.map((c) => (
+                <li key={c.id} role="none">
+                  <Link role="menuitem" href={`/shop?for=${s.slug}&category=${c.slug}`} onClick={() => setOpen(false)} className="block px-5 py-2 hover:bg-brown-dark hover:text-tan">
+                    {c.name}
+                  </Link>
+                </li>
+              ))}
+              <li role="none">
+                <Link role="menuitem" href={`/shop?for=${s.slug}`} onClick={() => setOpen(false)} className="block px-5 py-2 text-cream/70 hover:bg-brown-dark hover:text-tan">
+                  All {s.name.toLowerCase()}
+                </Link>
+              </li>
+            </ul>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

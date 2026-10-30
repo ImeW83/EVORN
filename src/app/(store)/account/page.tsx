@@ -15,7 +15,7 @@ export default async function AccountPage() {
   const orders = await listOrdersForUser(user.id);
   const reviewed = await getUserReviews(user.id, [...new Set(orders.flatMap((o) => o.items.map((i) => i.productId)))]);
   const toReview = (o: (typeof orders)[number]) =>
-    REVIEWABLE_STATUSES.includes(o.status) ? o.items.filter((i) => !reviewed[i.productId]).length : 0;
+    REVIEWABLE_STATUSES.includes(o.status) ? new Set(o.items.map((i) => i.productId).filter((id) => !reviewed[id])).size : 0;
   const { name, email, phone, address, city } = user; // never send the password hash to the browser
 
   return (

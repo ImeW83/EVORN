@@ -3,7 +3,8 @@ import Link from "next/link";
 import { HeroCarousel } from "@/components/hero/HeroCarousel";
 import { ProductCard } from "@/components/store/ProductCard";
 import { STORE } from "@/lib/config";
-import { getCategoriesWithCounts, getFeaturedProducts } from "@/server/services/catalog";
+import { SECTIONS } from "@/lib/sections";
+import { getCategoriesWithCounts, getFeaturedProducts, getSectionCovers } from "@/server/services/catalog";
 import { getRatings } from "@/server/services/reviews";
 import { getActiveSlides, getHeroInterval } from "@/server/services/hero";
 
@@ -46,7 +47,8 @@ function ShopBadge({ id, className }: { id: string; className: string }) {
 }
 
 export default async function Home() {
-  const [categories, featured, slides, interval] = await Promise.all([
+  const [covers, categories, featured, slides, interval] = await Promise.all([
+    getSectionCovers(),
     getCategoriesWithCounts(),
     getFeaturedProducts(8),
     getActiveSlides(),
@@ -93,6 +95,26 @@ export default async function Home() {
 
         </section>
       )}
+
+      <section aria-label="Shop by section" className="mx-auto grid max-w-7xl gap-4 px-5 pt-20 sm:grid-cols-2">
+        {SECTIONS.map((s) => (
+          <Link
+            key={s.slug}
+            href={`/shop?for=${s.slug}`}
+            className="group relative flex aspect-[16/10] flex-col items-center justify-center overflow-hidden bg-brown text-center text-cream"
+          >
+            {covers[s.slug] && (
+              <Image src={covers[s.slug]!} alt="" fill sizes="(min-width: 640px) 50vw, 100vw" className="object-cover transition duration-700 group-hover:scale-105" />
+            )}
+            <span aria-hidden className="absolute inset-0 bg-brown-dark/65 transition group-hover:bg-brown-dark/75" />
+            <span className="relative text-[11px] uppercase tracking-[0.3em] text-gold">Shop</span>
+            <span className="font-display relative mt-1 text-5xl md:text-6xl">{s.name}</span>
+            <span className="relative mt-4 border-b border-cream/60 pb-1 text-[11px] uppercase tracking-[0.25em] transition group-hover:border-gold group-hover:text-gold">
+              View collection
+            </span>
+          </Link>
+        ))}
+      </section>
 
       <section className="mx-auto max-w-7xl px-5 pt-20">
         <h2 className="text-center text-4xl">Shop by category</h2>

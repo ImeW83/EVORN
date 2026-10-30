@@ -17,15 +17,20 @@ function offsetOf(i: number, active: number, n: number) {
 }
 
 // Depth carousel: the active photo sits in front, its neighbours recede to the sides, angled and dimmed.
-export function ProductGallery({ images, name }: { images: Img[]; name: string }) {
-  const [active, setActive] = useState(0);
+// Pass `active` and `onActive` to control which photo is shown from outside (e.g. when a colour is picked).
+export function ProductGallery({
+  images, name, active: activeProp, onActive,
+}: { images: Img[]; name: string; active?: number; onActive?: (i: number) => void }) {
+  const [own, setOwn] = useState(0);
+  const active = activeProp ?? own;
+  const setActive = onActive ?? setOwn;
   const [open, setOpen] = useState(false);
   const slides = useRef<(HTMLButtonElement | null)[]>([]);
   const dragStart = useRef<number | null>(null);
   const dragged = useRef(false);
   const n = images.length;
 
-  const go = useCallback((delta: number) => setActive((a) => (a + delta + n) % n), [n]);
+  const go = useCallback((delta: number) => setActive((active + delta + n) % n), [active, n, setActive]);
 
   // Where the viewer's opening/closing animation starts and ends.
   const getOrigin = useCallback(() => {

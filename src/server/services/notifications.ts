@@ -15,7 +15,7 @@ type OrderLike = {
   city: string;
   paymentMethod: string;
   total: number;
-  items: { name: string; quantity: number; price: number }[];
+  items: { name: string; quantity: number; price: number; options?: { value: string }[] }[];
 };
 
 function esc(value: unknown): string {
@@ -49,7 +49,7 @@ function itemRows(order: OrderLike): string {
   return order.items
     .map(
       (i) =>
-        `<tr><td style="padding:4px 12px 4px 0">${esc(i.name)} × ${esc(i.quantity)}</td>` +
+        `<tr><td style="padding:4px 12px 4px 0">${esc(i.name)}${i.options?.length ? ` (${esc(i.options.map((o) => o.value).join(", "))})` : ""} × ${esc(i.quantity)}</td>` +
         `<td style="padding:4px 0;text-align:right">${money(i.price * i.quantity)}</td></tr>`,
     )
     .join("");

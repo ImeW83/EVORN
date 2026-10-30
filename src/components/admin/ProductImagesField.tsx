@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { getUploadParams } from "@/actions/admin/products";
 import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 import { IMAGE_TYPES } from "@/lib/config";
@@ -16,9 +16,11 @@ type Tile = { key: string; url?: string; publicId?: string; error?: string };
 export function ProductImagesField({
   initial,
   onBusyChange,
+  onChange,
 }: {
   initial: ProductImage[];
   onBusyChange: (busy: boolean) => void;
+  onChange?: (images: ProductImage[]) => void; // the uploaded photos, in order, whenever they change
 }) {
   const inputId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -27,6 +29,11 @@ export function ProductImagesField({
   const pending = useRef(0);
 
   const done = tiles.filter((t): t is Tile & ProductImage => !!t.url && !!t.publicId);
+  const doneJson = JSON.stringify(done.map(({ url, publicId }) => ({ url, publicId })));
+
+  useEffect(() => {
+    onChange?.(JSON.parse(doneJson));
+  }, [doneJson, onChange]);
 
   const setBusy = (delta: number) => {
     pending.current += delta;
@@ -86,7 +93,7 @@ export function ProductImagesField({
       <label htmlFor={inputId} className="mb-2 block text-[11px] uppercase tracking-[0.2em] text-brown/80">
         Photos (up to {MAX_IMAGES}; the first is the cover)
       </label>
-      <input type="hidden" name="images" value={JSON.stringify(done.map(({ url, publicId }) => ({ url, publicId })))} />
+      <input type="hidden" name="images" value={doneJson} />
 
       {tiles.length > 0 && (
         <ul className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">

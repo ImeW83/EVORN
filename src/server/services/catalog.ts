@@ -1,4 +1,5 @@
 import type { SortOrder } from "mongoose";
+import { DEFAULT_SECTIONS, type SectionSlug } from "@/lib/sections";
 import { connectDb } from "../db";
 import { CategoryModel, MaterialModel, ProductModel, isId } from "../models";
 import { plain } from "../serialize";
@@ -7,8 +8,22 @@ import type { Category, Material, Product } from "../types";
 // Adds the derived `image` (cover url) to a product document.
 const plainProduct = (doc: unknown): Product => {
   const p = plain<Omit<Product, "image">>(doc);
-  return { ...p, image: p.images?.[0]?.url ?? null, images: p.images ?? [], originalPrice: p.originalPrice ?? null };
+  return {
+    ...p,
+    image: p.images?.[0]?.url ?? null,
+    images: p.images ?? [],
+    options: p.options ?? [],
+    sections: p.sections?.length ? p.sections : DEFAULT_SECTIONS,
+    originalPrice: p.originalPrice ?? null,
+  };
 };
+
+// Mongo filter for products in a section. Products saved before sections existed have none and count as Ladies.
+function inSection(section: SectionSlug): Record<string, unknown> {
+  return section === "ladies"
+    ? { $or: [{ sections: "ladies" }, { sections: { $exists: false } }, { sections: { $size: 0 } }] }
+    : { sections: section };
+}
 const plainProducts = (docs: unknown[]) => docs.map(plainProduct);
 
 export type ProductWithCategory = Product & { category: Category };
@@ -37,6 +52,25 @@ export async function getCategoriesWithCounts() {
   return categories.map((c) => ({ ...c, productCount: countOf(c.id) }));
 }
 
+// Categories that have at least one product in the section, for the shop menu and the shop page.
+export async function getCategoriesInSection(section: SectionSlug) {
+  await connectDb();
+  const [categories, used] = await Promise.all([getCategories(), ProductModel.distinct("categoryId", inSection(section))]);
+  const ids = new Set(used.map(String));
+  return categories.filter((c) => ids.has(c.id));
+}
+
+// Cover photo for each section's home page tile: the newest product in that section that has a photo.
+export async function getSectionCovers(): Promise<Record<SectionSlug, string | null>> {
+  await connectDb();
+  const cover = async (section: SectionSlug) => {
+    const p = await ProductModel.findOne({ ...inSection(section), "images.0": { $exists: true } }).sort({ createdAt: -1 }).lean();
+    return p?.images?.[0]?.url ?? null;
+  };
+  const [ladies, men] = await Promise.all([cover("ladies"), cover("men")]);
+  return { ladies, men };
+}
+
 export async function getMaterials() {
   await connectDb();
   return plain<Material[]>(await MaterialModel.find().sort({ name: 1 }).lean());
@@ -62,11 +96,13 @@ export async function getFeaturedProducts(limit = 8) {
   return plainProducts(await ProductModel.find({ featured: true }).sort({ createdAt: -1 }).limit(limit).lean());
 }
 
-export type ProductFilters = { category?: string; material?: string; q?: string; min?: number; max?: number; sort?: string };
+export type ProductFilters = { section?: SectionSlug; category?: string; material?: string; q?: string; min?: number; max?: number; sort?: string };
 
 export async function searchProducts(f: ProductFilters) {
   await connectDb();
   const query: Record<string, unknown> = {};
+  const and: Record<string, unknown>[] = [];
+  if (f.section) and.push(inSection(f.section));
   if (f.category) {
     const cat = await CategoryModel.findOne({ slug: f.category }).lean();
     query.categoryId = cat?._id ?? null;
@@ -74,8 +110,9 @@ export async function searchProducts(f: ProductFilters) {
   if (f.material) query.material = f.material;
   if (f.q) {
     const rx = new RegExp(escapeRegex(f.q), "i");
-    query.$or = [{ name: rx }, { description: rx }];
+    and.push({ $or: [{ name: rx }, { description: rx }] });
   }
+  if (and.length) query.$and = and;
   if (f.min || f.max) query.price = { ...(f.min && { $gte: f.min }), ...(f.max && { $lte: f.max }) };
   const sort = (SORTS[f.sort ?? ""] ?? SORTS.newest).sort;
   return plainProducts(await ProductModel.find(query).sort(sort).lean());
@@ -90,9 +127,12 @@ export async function getProductBySlug(slug: string): Promise<ProductWithCategor
   return { ...plainProduct(product), category: plain<Category>(category) };
 }
 
-export async function getRelatedProducts(categoryId: string, excludeId: string, limit = 4) {
+// Same category and sharing a section, so a men's ring suggests other men's rings.
+export async function getRelatedProducts(categoryId: string, excludeId: string, sections: SectionSlug[], limit = 4) {
   await connectDb();
-  return plainProducts(await ProductModel.find({ categoryId, _id: { $ne: excludeId } }).limit(limit).lean());
+  return plainProducts(
+    await ProductModel.find({ categoryId, _id: { $ne: excludeId }, $or: sections.map((s) => inSection(s)) }).limit(limit).lean(),
+  );
 }
 
 // Admin

@@ -1,4 +1,6 @@
 import type { OrderStatus, PaymentMethod, PaymentStatus } from "@/lib/config";
+import type { OptionGroup, SelectedOption } from "@/lib/options";
+import type { SectionSlug } from "@/lib/sections";
 
 // Plain, serialisable shapes returned by the services (ids are strings).
 
@@ -18,9 +20,11 @@ export type Product = {
   material: string;
   images: ProductImage[]; // first one is the cover
   image: string | null; // cover url, derived from images
+  options: OptionGroup[]; // empty when the product has no choices
   inStock: boolean;
   featured: boolean;
   categoryId: string;
+  sections: SectionSlug[]; // Ladies, Men or both
   createdAt: Date;
 };
 
@@ -34,7 +38,7 @@ export type User = {
   city: string | null;
 };
 
-export type OrderItem = { productId: string; name: string; price: number; quantity: number };
+export type OrderItem = { productId: string; name: string; price: number; options: SelectedOption[]; quantity: number };
 
 export type Receipt = { publicId: string; format: string; uploadedAt: Date };
 

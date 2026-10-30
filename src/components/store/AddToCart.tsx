@@ -2,18 +2,22 @@
 
 import { useState } from "react";
 import { cart } from "@/lib/cart";
+import type { SelectedOption } from "@/lib/options";
 
 type Props = {
   product: { id: string; slug: string; name: string; price: number; image: string | null };
+  options?: SelectedOption[]; // the customer's choices, when the product has options
+  canAdd?: () => boolean; // runs first; return false to stop (e.g. a size isn't chosen yet)
   disabled?: boolean;
   compact?: boolean;
 };
 
-export function AddToCart({ product, disabled, compact }: Props) {
+export function AddToCart({ product, options = [], canAdd, disabled, compact }: Props) {
   const [added, setAdded] = useState(false);
 
   function add() {
-    cart.add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, image: product.image });
+    if (canAdd && !canAdd()) return;
+    cart.add({ productId: product.id, slug: product.slug, name: product.name, price: product.price, options, image: product.image });
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   }

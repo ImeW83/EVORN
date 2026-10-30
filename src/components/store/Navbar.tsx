@@ -1,18 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getCustomer } from "@/server/auth/customer";
-import { getCategories } from "@/server/services/catalog";
+import { SECTIONS } from "@/lib/sections";
+import { getCategoriesInSection } from "@/server/services/catalog";
 import { CartLink } from "./CartLink";
 import { SearchBox } from "./SearchBox";
 import { ShopMenu } from "./ShopMenu";
 
 export async function Navbar() {
-  const categories = await getCategories();
+  const sections = await Promise.all(
+    SECTIONS.map(async (s) => ({ ...s, categories: await getCategoriesInSection(s.slug) })),
+  );
   const user = await getCustomer();
   const links = (
     <>
       <Link href="/" className="uppercase tracking-[0.2em] hover:text-tan">Home</Link>
-      <ShopMenu categories={categories} />
+      <ShopMenu sections={sections} />
       <Link href="/#contact" className="uppercase tracking-[0.2em] hover:text-tan">Contact us</Link>
     </>
   );

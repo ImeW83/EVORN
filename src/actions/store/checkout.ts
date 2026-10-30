@@ -2,6 +2,7 @@
 
 import { after } from "next/server";
 import { PAYMENT_METHODS, calcDelivery, type PaymentMethod } from "@/lib/config";
+import { selectionExtra, type OptionGroup, type SelectedOption } from "@/lib/options";
 import { PHONE_ERROR, normalizePhone } from "@/lib/phone";
 import { getCustomer } from "@/server/auth/customer";
 import { connectDb } from "@/server/db";
@@ -11,7 +12,7 @@ import { newOrderNumber } from "@/server/services/orders";
 import { getDeliverySettings } from "@/server/services/settings";
 
 export type CheckoutInput = {
-  items: { productId: string; quantity: number }[];
+  items: { productId: string; options?: SelectedOption[]; quantity: number }[];
   name: string;
   phone: string;
   email: string;
@@ -48,13 +49,21 @@ export async function placeOrder(input: CheckoutInput): Promise<CheckoutResult> 
   const products = await ProductModel.find({ _id: { $in: ids } }).lean();
   const byId = new Map(products.map((p) => [String(p._id), p]));
 
-  const lines: { productId: unknown; name: string; price: number; quantity: number }[] = [];
+  const lines: { productId: unknown; name: string; price: number; options: SelectedOption[]; quantity: number }[] = [];
   for (const item of input.items) {
     const product = byId.get(String(item.productId));
     const quantity = Math.floor(Number(item.quantity));
     if (!product || quantity < 1 || quantity > 20) return { ok: false, error: "An item in your cart is no longer available." };
     if (!product.inStock) return { ok: false, error: `${product.name} is sold out. Please remove it from your cart.` };
-    lines.push({ productId: product._id, name: product.name, price: product.price, quantity });
+    const groups = (product.options ?? []) as OptionGroup[];
+    const options = (Array.isArray(item.options) ? item.options : []).map((o) => ({ name: String(o?.name), value: String(o?.value) }));
+    const extra = selectionExtra(groups, options);
+    if (extra === null) {
+      return { ok: false, error: `The options chosen for ${product.name} are no longer available. Please remove it and add it again.` };
+    }
+    // Store the options in the product's own order (e.g. Color before Size).
+    const ordered = groups.map((g) => options.find((o) => o.name === g.name)!);
+    lines.push({ productId: product._id, name: product.name, price: product.price + extra, options: ordered, quantity });
   }
 
   const subtotal = lines.reduce((n, l) => n + l.price * l.quantity, 0);

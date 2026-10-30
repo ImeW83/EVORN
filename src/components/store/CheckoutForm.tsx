@@ -7,6 +7,7 @@ import { placeOrder } from "@/actions/store/checkout";
 import { cart, useCart } from "@/lib/cart";
 import { PAYMENT_METHOD_LABELS, type PaymentMethod } from "@/lib/config";
 import { money } from "@/lib/format";
+import { optionsText } from "@/lib/options";
 import { PHONE_HINT } from "@/lib/phone";
 import type { BankAccount } from "@/server/types";
 import { BankAccountList } from "./BankAccountList";
@@ -40,7 +41,7 @@ export function CheckoutForm({
     const f = new FormData(e.currentTarget);
     const get = (k: string) => String(f.get(k) ?? "");
     const result = await placeOrder({
-      items: lines.map((l) => ({ productId: l.productId, quantity: l.quantity })),
+      items: lines.map((l) => ({ productId: l.productId, options: l.options, quantity: l.quantity })),
       name: get("name"),
       phone: get("phone"),
       email: get("email"),
@@ -158,9 +159,10 @@ export function CheckoutForm({
         <OrderSummary subtotal={subtotal}>
           <ul className="mt-5 divide-y divide-line text-sm">
             {lines.map((l) => (
-              <li key={l.productId} className="flex justify-between gap-4 py-3">
+              <li key={l.key} className="flex justify-between gap-4 py-3">
                 <span>
                   {l.name} <span className="text-brown/60">× {l.quantity}</span>
+                  {l.options.length > 0 && <span className="block text-xs text-brown/70">{optionsText(l.options)}</span>}
                 </span>
                 <span>{money(l.price * l.quantity)}</span>
               </li>

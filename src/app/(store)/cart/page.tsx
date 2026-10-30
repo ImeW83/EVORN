@@ -6,6 +6,7 @@ import { OrderSummary } from "@/components/store/OrderSummary";
 import { ProductImage } from "@/components/store/ProductImage";
 import { cart, useCart } from "@/lib/cart";
 import { money } from "@/lib/format";
+import { optionsText } from "@/lib/options";
 
 export default function CartPage() {
   const { lines, subtotal } = useCart();
@@ -33,7 +34,7 @@ export default function CartPage() {
       <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_380px]">
         <ul className="divide-y divide-line border-y border-line">
           {lines.map((l) => (
-            <li key={l.productId} className="flex gap-5 py-6">
+            <li key={l.key} className="flex gap-5 py-6">
               <Link href={`/product/${l.slug}`} className="w-24 shrink-0 sm:w-28">
                 <ProductImage src={l.image} alt={l.name} className="aspect-[4/5]" />
               </Link>
@@ -41,17 +42,18 @@ export default function CartPage() {
                 <div className="flex justify-between gap-4">
                   <div>
                     <Link href={`/product/${l.slug}`} className="font-display text-2xl hover:text-brown">{l.name}</Link>
+                    {l.options.length > 0 && <p className="text-sm text-brown-dark/80">{optionsText(l.options)}</p>}
                     <p className="text-sm text-brown/70">{money(l.price)}</p>
                   </div>
                   <p className="font-medium">{money(l.price * l.quantity)}</p>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center border border-line">
-                    <button aria-label="Decrease quantity" onClick={() => cart.setQuantity(l.productId, l.quantity - 1)} className="h-9 w-9 hover:bg-sand">−</button>
+                    <button aria-label="Decrease quantity" onClick={() => cart.setQuantity(l.key, l.quantity - 1)} className="h-9 w-9 hover:bg-sand">−</button>
                     <span className="w-9 text-center text-sm">{l.quantity}</span>
-                    <button aria-label="Increase quantity" onClick={() => cart.setQuantity(l.productId, l.quantity + 1)} className="h-9 w-9 hover:bg-sand">+</button>
+                    <button aria-label="Increase quantity" onClick={() => cart.setQuantity(l.key, l.quantity + 1)} className="h-9 w-9 hover:bg-sand">+</button>
                   </div>
-                  <button onClick={() => cart.remove(l.productId)} className="text-xs uppercase tracking-[0.2em] text-brown/70 underline underline-offset-4 hover:text-brown">
+                  <button onClick={() => cart.remove(l.key)} className="text-xs uppercase tracking-[0.2em] text-brown/70 underline underline-offset-4 hover:text-brown">
                     Remove
                   </button>
                 </div>

@@ -11,6 +11,7 @@ import { PaymentBadge } from "@/components/ui/PaymentBadge";
 import { money } from "@/lib/format";
 import { listBankAccounts } from "@/server/services/bank-accounts";
 import { getOrderByNumber } from "@/server/services/orders";
+import { optionsText } from "@/lib/options";
 
 export const dynamic = "force-dynamic";
 
@@ -78,9 +79,12 @@ export default async function OrderConfirmation({ params }: PageProps<"/order/[n
 
       <div className="mt-10 border border-line bg-sand/60 p-6 text-left text-sm">
         <ul className="divide-y divide-line">
-          {order.items.map((i) => (
-            <li key={i.productId} className="flex justify-between py-3">
-              <span>{i.name} <span className="text-brown/60">× {i.quantity}</span></span>
+          {order.items.map((i, n) => (
+            <li key={n} className="flex justify-between gap-4 py-3">
+              <span>
+                {i.name} <span className="text-brown/60">× {i.quantity}</span>
+                {i.options?.length > 0 && <span className="block text-xs text-brown/70">{optionsText(i.options)}</span>}
+              </span>
               <span>{money(i.price * i.quantity)}</span>
             </li>
           ))}
@@ -100,7 +104,8 @@ export default async function OrderConfirmation({ params }: PageProps<"/order/[n
           <h2 id="rate-heading" className="text-3xl">Rate your purchase</h2>
           <p className="mt-2 text-sm text-brown/80">Your order has arrived. Tell other customers what you think.</p>
           <ul className="mt-6 divide-y divide-line">
-            {order.items.map((i) => {
+            {/* One form per product, even if it was bought in two sizes. */}
+            {order.items.filter((i, n) => order.items.findIndex((x) => x.productId === i.productId) === n).map((i) => {
               const existing = reviews[i.productId];
               return (
                 <li key={i.productId} className="py-6 first:pt-0 last:pb-0">

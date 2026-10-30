@@ -1,5 +1,6 @@
 import { model, models, Schema, Types, type Model } from "mongoose";
 import { ORDER_STATUSES, PAYMENT_METHODS, PAYMENT_STATUSES } from "@/lib/config";
+import { SECTIONS } from "@/lib/sections";
 import { HERO_BUTTON_THEMES, HERO_FOCUS, HERO_LIMITS, HERO_SIZES, HERO_STYLES, HERO_X, HERO_Y, HEX_COLOR } from "@/lib/hero";
 
 // `models.X ?? model(...)` keeps hot reloading from re-registering a model.
@@ -28,6 +29,27 @@ export const MaterialModel = define(
   "materials",
 );
 
+const OptionGroupSchema = new Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    choices: {
+      type: [
+        new Schema(
+          {
+            label: { type: String, required: true, trim: true },
+            extra: { type: Number, default: 0, min: 0 }, // added to the product price when chosen
+            available: { type: Boolean, default: true },
+            image: { type: String, default: null }, // publicId of one of the product's photos, shown when chosen
+          },
+          { _id: false },
+        ),
+      ],
+      default: [],
+    },
+  },
+  { _id: false },
+);
+
 export const ProductModel = define(
   "Product",
   new Schema(
@@ -39,9 +61,11 @@ export const ProductModel = define(
       originalPrice: { type: Number, default: null }, // set when discounted: shown struck through next to price
       material: { type: String, required: true },
       images: { type: [new Schema({ url: String, publicId: String }, { _id: false })], default: [] },
+      options: { type: [OptionGroupSchema], default: [] }, // e.g. Color, Design, Size; see src/lib/options.ts
       inStock: { type: Boolean, default: true },
       featured: { type: Boolean, default: false },
       categoryId: { type: Schema.Types.ObjectId, ref: "Category", required: true, index: true },
+      sections: { type: [{ type: String, enum: SECTIONS.map((s) => s.slug) }], default: ["ladies"] }, // Ladies, Men or both
     },
     { ...opts, timestamps: { createdAt: true, updatedAt: false } },
   ),
@@ -68,7 +92,8 @@ const OrderItemSchema = new Schema(
   {
     productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
     name: { type: String, required: true }, // snapshot at time of order
-    price: { type: Number, required: true }, // snapshot at time of order
+    price: { type: Number, required: true }, // snapshot at time of order, including option extras
+    options: { type: [new Schema({ name: String, value: String }, { _id: false })], default: [] }, // chosen Color, Size...
     quantity: { type: Number, required: true, min: 1 },
   },
   { _id: false },

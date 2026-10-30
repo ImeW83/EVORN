@@ -9,6 +9,7 @@ import { dateTime, money } from "@/lib/format";
 import { requireAdmin } from "@/server/auth/admin";
 import { receiptUrl } from "@/server/services/cloudinary";
 import { getOrderById } from "@/server/services/orders";
+import { optionsText } from "@/lib/options";
 
 export const dynamic = "force-dynamic";
 
@@ -50,9 +51,12 @@ export default async function OrderDetails({ params }: PageProps<"/admin/orders/
                 </tr>
               </thead>
               <tbody className="divide-y divide-line">
-                {order.items.map((i) => (
-                  <tr key={i.productId}>
-                    <td className="py-3">{i.name}</td>
+                {order.items.map((i, n) => (
+                  <tr key={n}>
+                    <td className="py-3">
+                      {i.name}
+                      {i.options?.length > 0 && <span className="block text-xs text-brown/70">{optionsText(i.options)}</span>}
+                    </td>
                     <td className="py-3 text-right">{money(i.price)}</td>
                     <td className="py-3 text-right">{i.quantity}</td>
                     <td className="py-3 text-right">{money(i.price * i.quantity)}</td>

@@ -1,3 +1,4 @@
+import { SECTIONS } from "@/lib/sections";
 import Link from "next/link";
 import { Price } from "@/components/ui/Price";
 import { requireAdmin } from "@/server/auth/admin";
@@ -34,7 +35,10 @@ export default async function AdminProducts() {
                   <Link href={`/admin/products/${p.id}`} className="font-medium text-brown underline underline-offset-4">{p.name}</Link>
                   {p.featured && <span className="ml-2 text-[10px] uppercase tracking-[0.15em] text-tan">Featured</span>}
                 </td>
-                <td className="px-4 py-3">{p.category.name}</td>
+                <td className="px-4 py-3">
+                  {p.category.name}
+                  <span className="block text-xs text-brown/60">{SECTIONS.filter((x) => p.sections.includes(x.slug)).map((x) => x.name).join(" & ")}</span>
+                </td>
                 <td className="px-4 py-3"><Price price={p.price} originalPrice={p.originalPrice} /></td>
                 <td className="px-4 py-3">{p.inStock ? "In stock" : <span className="text-red-700">Sold out</span>}</td>
               </tr>

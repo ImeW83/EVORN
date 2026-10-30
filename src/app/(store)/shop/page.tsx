@@ -1,15 +1,18 @@
 import Link from "next/link";
 import { ProductCard } from "@/components/store/ProductCard";
-import { SORTS, getCategories, getUsedMaterials, searchProducts } from "@/server/services/catalog";
+import { SECTIONS, isSection, sectionOf } from "@/lib/sections";
+import { SORTS, getCategories, getCategoriesInSection, getUsedMaterials, searchProducts } from "@/server/services/catalog";
 import { getRatings } from "@/server/services/reviews";
 
 export const dynamic = "force-dynamic";
 
-type Search = { category?: string; material?: string; min?: string; max?: string; sort?: string; q?: string };
+type Search = { for?: string; category?: string; material?: string; min?: string; max?: string; sort?: string; q?: string };
 
 export default async function Shop({ searchParams }: PageProps<"/shop">) {
   const sp = (await searchParams) as Search;
   const first = (v: unknown) => (typeof v === "string" ? v : undefined);
+  const sectionSlug = first(sp.for);
+  const section = isSection(sectionSlug) ? sectionSlug : undefined;
   const category = first(sp.category);
   const material = first(sp.material);
   const q = first(sp.q)?.trim();
@@ -18,22 +21,41 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
   const max = Number(first(sp.max)) || undefined;
 
   const [categories, materials, products] = await Promise.all([
-    getCategories(),
+    section ? getCategoriesInSection(section) : getCategories(),
     getUsedMaterials(),
-    searchProducts({ category, material, q, min, max, sort }),
+    searchProducts({ section, category, material, q, min, max, sort }),
   ]);
 
   const ratings = await getRatings(products.map((p) => p.id));
   const activeCategory = categories.find((c) => c.slug === category);
+  const activeSection = sectionOf(section);
   const hasFilters = Boolean(material || q || min || max);
-  const href = (slug?: string) => (slug ? `/shop?category=${slug}` : "/shop");
+  // Links keep the section and category unless told otherwise.
+  const href = (to: { for?: string; category?: string } = { for: section, category }) => {
+    const params = new URLSearchParams();
+    if (to.for) params.set("for", to.for);
+    if (to.category) params.set("category", to.category);
+    const qs = params.toString();
+    return qs ? `/shop?${qs}` : "/shop";
+  };
+  const tab = (on: boolean) =>
+    `border-b-2 pb-2 text-[12px] uppercase tracking-[0.25em] transition ${on ? "border-brown text-brown-dark" : "border-transparent text-brown/60 hover:text-brown"}`;
 
   const field = "w-full border border-line bg-pearl px-3 py-2.5 text-sm outline-none focus:border-brown";
   const label = "mb-2 block text-[11px] uppercase tracking-[0.2em] text-tan";
 
   return (
     <div className="mx-auto max-w-7xl px-5 py-12">
-      <h1 className="text-5xl">{activeCategory?.name ?? "All jewellery"}</h1>
+      <nav aria-label="Shop sections" className="mb-8 flex gap-8 border-b border-line">
+        <Link href={href({ category })} aria-current={!section ? "page" : undefined} className={tab(!section)}>All</Link>
+        {SECTIONS.map((s) => (
+          <Link key={s.slug} href={href({ for: s.slug })} aria-current={section === s.slug ? "page" : undefined} className={tab(section === s.slug)}>
+            {s.name}
+          </Link>
+        ))}
+      </nav>
+      {activeSection && activeCategory && <p className="text-[11px] uppercase tracking-[0.25em] text-tan">{activeSection.name}</p>}
+      <h1 className="text-5xl">{activeCategory?.name ?? activeSection?.title ?? "All jewellery"}</h1>
       <p className="mt-2 text-sm text-brown/70">
         {products.length} {products.length === 1 ? "piece" : "pieces"}
       </p>
@@ -42,7 +64,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
         {[{ name: "All", slug: undefined as string | undefined }, ...categories].map((c) => (
           <Link
             key={c.name}
-            href={href(c.slug)}
+            href={href({ for: section, category: c.slug })}
             className={`border px-5 py-2 text-[11px] uppercase tracking-[0.2em] transition ${
               category === c.slug || (!category && !c.slug)
                 ? "border-brown bg-brown text-cream"
@@ -66,6 +88,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
           <span aria-hidden>▾</span>
         </label>
         <form action="/shop" className="mt-3 hidden space-y-6 border border-line p-5 peer-checked:block lg:mt-0 lg:block">
+          {section && <input type="hidden" name="for" value={section} />}
           {category && <input type="hidden" name="category" value={category} />}
           <div>
             <label htmlFor="q" className={label}>Search</label>
@@ -101,7 +124,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
               Apply
             </button>
             {(hasFilters || sort !== "newest") && (
-              <Link href={href(category)} className="border border-line px-4 py-3 text-[11px] uppercase tracking-[0.2em] hover:border-brown">
+              <Link href={href()} className="border border-line px-4 py-3 text-[11px] uppercase tracking-[0.2em] hover:border-brown">
                 Reset
               </Link>
             )}
@@ -112,7 +135,7 @@ export default async function Shop({ searchParams }: PageProps<"/shop">) {
         {products.length === 0 ? (
           <div className="py-20 text-center">
             <p className="font-display text-3xl">No pieces match your filters</p>
-            <Link href={href(category)} className="mt-4 inline-block text-sm underline underline-offset-4">
+            <Link href={href()} className="mt-4 inline-block text-sm underline underline-offset-4">
               Clear filters
             </Link>
           </div>
